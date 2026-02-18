@@ -187,9 +187,9 @@ else
     if ! docker buildx version &>/dev/null; then
         echo "arm64 host detected. Installing Docker buildx..."
         mkdir -p ~/.docker/cli-plugins
-        BUILDX_ARCH="arm64"
-        BUILDX_URL="https://github.com/docker/buildx/releases/latest/download/buildx-$(uname -s | tr '[:upper:]' '[:lower:]')-${BUILDX_ARCH}"
-        curl -fsSL "$BUILDX_URL" -o ~/.docker/cli-plugins/docker-buildx
+        BUILDX_VERSION=$(curl -fsSL https://api.github.com/repos/docker/buildx/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+        curl -fsSL "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-arm64" \
+            -o ~/.docker/cli-plugins/docker-buildx
         chmod +x ~/.docker/cli-plugins/docker-buildx
         echo "Docker buildx installed: $(docker buildx version)"
     fi

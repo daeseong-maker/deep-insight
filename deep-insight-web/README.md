@@ -35,7 +35,10 @@ Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentC
 cd deep-insight-web
 
 # Deploy (ECR, Docker build/push, ALB, ECS)
-bash deploy.sh
+# VPN_CIDR restricts ALB access to your VPN's IP range (only users on the VPN can reach the Web UI)
+# Usage: bash deploy.sh <VPN_CIDR>
+# Example: bash deploy.sh "10.0.0.0/8"
+bash deploy.sh "<YOUR_VPN_CIDR>"
 
 # Wait for service to stabilize
 aws ecs wait services-stable \
@@ -48,22 +51,6 @@ bash deploy.sh cleanup
 ```
 
 > **Note**: Do NOT test during rolling deployment — the old ECS task gets killed mid-stream.
-
-To add additional IP ranges to the ALB after deployment:
-
-```bash
-# Check your deployment region from managed-agentcore/.env
-grep AWS_REGION ../managed-agentcore/.env
-
-# Find your ALB Security Group ID
-aws ec2 describe-security-groups \
-  --filters "Name=group-name,Values=deep-insight-web-alb-sg" \
-  --query "SecurityGroups[0].GroupId" --output text --region us-west-2
-
-# Add your VPN's IP range so users on the VPN can reach the Web UI
-# Usage: bash add_alb_sg_rule.sh <ALB_SG_ID> <ALLOWED_CIDR> [REGION]
-bash add_alb_sg_rule.sh sg-0abc1234def56789 "10.0.0.0/8" us-west-2
-```
 
 ---
 

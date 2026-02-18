@@ -14,7 +14,11 @@ set -e
 #   - managed-agentcore/.env populated (from Phase 1+2 deployment)
 #
 # Usage:
-#   bash deploy.sh
+#   bash deploy.sh <VPN_CIDR>
+#
+# Examples:
+#   bash deploy.sh "10.0.0.0/8"
+#   bash deploy.sh "54.239.0.0/16"
 #
 # To clean up all resources created by this script:
 #   bash deploy.sh cleanup
@@ -52,8 +56,16 @@ EXECUTION_ROLE_ARN="${TASK_EXECUTION_ROLE_ARN}"
 S3_BUCKET="${S3_BUCKET_NAME}"
 RUNTIME_ARN_VALUE="${RUNTIME_ARN}"
 
-# VPN CIDR for ALB access restriction
-VPN_CIDR="<YOUR_VPN_CIDR>"
+# VPN CIDR for ALB access restriction (required argument)
+if [ "${1}" != "cleanup" ]; then
+    if [ -z "$1" ]; then
+        echo "ERROR: VPN CIDR is required."
+        echo "Usage: bash deploy.sh <VPN_CIDR>"
+        echo "Example: bash deploy.sh \"10.0.0.0/8\""
+        exit 1
+    fi
+    VPN_CIDR="$1"
+fi
 
 # New resources
 ECR_REPO_NAME="deep-insight-web"

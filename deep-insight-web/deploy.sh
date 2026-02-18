@@ -178,25 +178,7 @@ echo "ECR: ${ECR_URI}"
 # ---------- Step 2: Docker Build + Push ----------
 
 echo "=== Step 2: Docker Build + Push ==="
-# Fargate requires linux/amd64 images.
-# On arm64 hosts, cross-compile with docker buildx (requires buildx installed).
-HOST_ARCH=$(uname -m)
-if [ "$HOST_ARCH" = "x86_64" ]; then
-    docker build --no-cache -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
-else
-    if ! docker buildx version &>/dev/null; then
-        echo "arm64 host detected. Installing Docker buildx..."
-        mkdir -p ~/.docker/cli-plugins
-        BUILDX_VERSION=$(curl -fsSL https://api.github.com/repos/docker/buildx/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
-        curl -fsSL "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-arm64" \
-            -o ~/.docker/cli-plugins/docker-buildx
-        chmod +x ~/.docker/cli-plugins/docker-buildx
-        echo "Docker buildx installed: $(docker buildx version)"
-    fi
-    # Set up QEMU for cross-platform emulation (run amd64 binaries on arm64)
-    docker run --privileged --rm tonistiigi/binfmt --install amd64
-    docker buildx build --no-cache --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
-fi
+docker build --no-cache -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 
 aws ecr get-login-password --region "$REGION" \
     | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
@@ -467,6 +449,10 @@ TASK_DEF=$(cat <<TASKDEF
     "family": "${TASK_FAMILY}",
     "networkMode": "awsvpc",
     "requiresCompatibilities": ["FARGATE"],
+    "runtimePlatform": {
+        "cpuArchitecture": "ARM64",
+        "operatingSystemFamily": "LINUX"
+    },
     "cpu": "256",
     "memory": "512",
     "executionRoleArn": "${EXECUTION_ROLE_ARN}",

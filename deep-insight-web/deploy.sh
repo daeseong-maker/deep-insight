@@ -178,7 +178,7 @@ echo "ECR: ${ECR_URI}"
 # ---------- Step 2: Docker Build + Push ----------
 
 echo "=== Step 2: Docker Build + Push ==="
-docker buildx build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 
 aws ecr get-login-password --region "$REGION" \
     | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"

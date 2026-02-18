@@ -185,10 +185,13 @@ if [ "$HOST_ARCH" = "x86_64" ]; then
     docker build -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 else
     if ! docker buildx version &>/dev/null; then
-        echo "ERROR: arm64 host detected but Docker buildx is not installed."
-        echo "Fargate requires linux/amd64 images. Install buildx:"
-        echo "  https://docs.docker.com/go/buildx/"
-        exit 1
+        echo "arm64 host detected. Installing Docker buildx..."
+        mkdir -p ~/.docker/cli-plugins
+        BUILDX_ARCH="arm64"
+        BUILDX_URL="https://github.com/docker/buildx/releases/latest/download/buildx-$(uname -s | tr '[:upper:]' '[:lower:]')-${BUILDX_ARCH}"
+        curl -fsSL "$BUILDX_URL" -o ~/.docker/cli-plugins/docker-buildx
+        chmod +x ~/.docker/cli-plugins/docker-buildx
+        echo "Docker buildx installed: $(docker buildx version)"
     fi
     docker buildx build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 fi

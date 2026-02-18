@@ -182,7 +182,7 @@ echo "=== Step 2: Docker Build + Push ==="
 # On arm64 hosts, cross-compile with docker buildx (requires buildx installed).
 HOST_ARCH=$(uname -m)
 if [ "$HOST_ARCH" = "x86_64" ]; then
-    docker build -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+    docker build --no-cache -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 else
     if ! docker buildx version &>/dev/null; then
         echo "arm64 host detected. Installing Docker buildx..."
@@ -193,7 +193,7 @@ else
         chmod +x ~/.docker/cli-plugins/docker-buildx
         echo "Docker buildx installed: $(docker buildx version)"
     fi
-    docker buildx build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+    docker buildx build --no-cache --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 fi
 
 aws ecr get-login-password --region "$REGION" \

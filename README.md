@@ -92,10 +92,7 @@ Browser-based interface for non-technical users:
 - ✅ Upload data, review plans, download reports from the browser
 - ✅ Korean/English language support
 - ✅ Internet-facing ALB with VPN CIDR restriction
-
-<img src="./docs/front-end/images/web-ui.png" alt="Deep Insight Web UI" width="600"/>
-
-**Get Started**: [`./deep-insight-web/`](./deep-insight-web/) | 📖 [Development Plan](./docs/front-end/03-development-plan.md)
+**Get Started**: [`./deep-insight-web/`](./deep-insight-web/) | 📖 [Web UI README](./deep-insight-web/README.md)
 
 ## Deployment Options
 

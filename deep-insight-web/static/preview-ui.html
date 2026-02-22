@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Insight UI Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0d0f13;
+            --bg-surface: #161921;
+            --bg-card: #1c2029;
+            --bg-elevated: #232833;
+            --border: #2a2f3a;
+            --border-hover: #3d445a;
+            --text-primary: #e8eaf0;
+            --text-secondary: #b0b8ce;
+            --text-muted: #7f88a0;
+            --accent: #4a7cff;
+            --accent-glow: rgba(74, 124, 255, 0.15);
+            --accent-hover: #6190ff;
+            --green: #34d399;
+            --green-bg: rgba(52, 211, 153, 0.1);
+            --green-border: rgba(52, 211, 153, 0.25);
+            --red: #f87171;
+            --amber: #fbbf24;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-display);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        .top-bar-left { display: flex; align-items: center; gap: 0.5rem; }
+        .top-bar-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .top-bar-link:hover { border-color: var(--accent); color: var(--accent); }
+        .top-bar-link svg { width: 14px; height: 14px; fill: currentColor; }
+        .lang-area { display: flex; align-items: center; gap: 0.5rem; }
+        .lang-label { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; }
+        .lang-toggle {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(74, 124, 255, 0.3);
+            border-radius: var(--radius-xs);
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-toggle:hover { color: var(--text-primary); border-color: var(--accent); background: rgba(74, 124, 255, 0.2); }
+        .lang-hint {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            text-align: right;
+        }
+
+        /* Hero */
+        .hero { text-align: center; padding: 3rem 1rem 2.5rem; position: relative; }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 400px;
+            background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-logo-wrap {
+            position: relative; z-index: 1;
+            display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.8rem;
+        }
+        .hero-logo { width: 80px; height: 80px; border-radius: 18px; box-shadow: 0 6px 30px rgba(74, 124, 255, 0.4), 0 0 60px rgba(74, 124, 255, 0.15); }
+        .hero-title {
+            font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #e8eaf0 30%, var(--accent) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-tagline { position: relative; z-index: 1; color: var(--text-primary); font-size: 1.1rem; font-weight: 400; letter-spacing: 0.02em; line-height: 1.7; }
+        .hero-tagline .highlight { color: #c084fc; font-weight: 600; }
+        .hero-subtitle { position: relative; z-index: 1; color: var(--text-secondary); font-size: 0.9rem; font-weight: 400; margin-top: 0.4rem; letter-spacing: 0.01em; }
+        .hero-learn { position: relative; z-index: 1; margin-top: 0.6rem; }
+        .hero-learn a { color: var(--accent); font-size: 0.85rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+        .hero-learn a:hover { color: var(--accent-hover); text-decoration: underline; text-underline-offset: 2px; }
+
+        /* Main */
+        main { flex: 1; max-width: 780px; width: 100%; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        /* Card (execution zone - stronger borders) */
+        .card { background: var(--bg-card); border: 1px solid var(--border-hover); border-radius: var(--radius); padding: 1.8rem; margin-bottom: 1.2rem; transition: border-color 0.2s; }
+        .card:hover { border-color: rgba(74, 124, 255, 0.25); }
+        .card h2 { font-size: 1rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+        /* Guide card - transparent, no border */
+        #guide-card { background: transparent; border: none; padding: 1.8rem 0.5rem; }
+        #guide-card:hover { border-color: transparent; }
+
+        /* Guide */
+        .guide-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .guide-header h2 { margin-bottom: 0; }
+        .guide-arrow { font-size: 0.75rem; color: var(--text-muted); transition: transform 0.25s; }
+        .guide-body { margin-top: 1.2rem; }
+        .guide-steps { padding-left: 1.3rem; line-height: 2.2; color: var(--text-secondary); font-size: 0.92rem; }
+        .guide-steps li { padding-left: 0.3rem; }
+        .guide-steps li::marker { color: var(--accent); font-weight: 600; }
+        .step-icon { margin-right: 0.4rem; font-size: 0.9rem; }
+        .guide-divider { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+        /* Callout */
+        .callout { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 1rem; border-radius: var(--radius-xs); font-size: 0.82rem; line-height: 1.5; margin-bottom: 0.8rem; }
+        .callout-icon { flex-shrink: 0; font-size: 0.95rem; margin-top: 0.05rem; }
+        .callout-amber { background: rgba(251, 191, 36, 0.08); border-left: 3px solid var(--amber); color: var(--text-secondary); }
+        .callout-blue { background: rgba(74, 124, 255, 0.08); border-left: 3px solid var(--accent); color: var(--text-secondary); }
+
+        /* Sample */
+        .sample-data-section h3 { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .sample-link {
+            display: inline-flex; align-items: center; gap: 0.4rem; margin: 0.2rem 0.4rem 0.2rem 0;
+            padding: 0.4rem 0.9rem; background: var(--bg-elevated); color: var(--accent); border: 1px solid var(--border);
+            border-radius: var(--radius-xs); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: all 0.2s;
+        }
+        .sample-link:hover { background: var(--accent-glow); border-color: var(--accent); }
+        .sample-link::before { content: '\2193'; font-size: 0.75rem; opacity: 0.6; }
+
+        /* Section Divider */
+        .section-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0 1.2rem; }
+        .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .section-divider-text { color: var(--accent); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+
+        /* Upload */
+        .field { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.4rem; font-weight: 500; font-size: 0.92rem; color: var(--text-primary); }
+        label .req { color: var(--red); margin-left: 0.2rem; }
+        .tag-recommended {
+            display: inline-block; font-size: 0.68rem; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            background: rgba(74, 124, 255, 0.12); color: var(--accent); border: 1px solid rgba(74, 124, 255, 0.25);
+            margin-left: 0.3rem; vertical-align: middle;
+        }
+        .drop-zone {
+            border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 2rem; text-align: center;
+            cursor: pointer; transition: all 0.25s; background: var(--bg-surface); position: relative;
+        }
+        .drop-zone:hover { border-color: var(--accent); background: var(--accent-glow); }
+        .drop-zone-icon { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
+        .drop-zone-text { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; }
+        .drop-zone-text .browse { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+        .drop-zone-hint { color: var(--text-muted); font-size: 0.78rem; margin-top: 0.4rem; }
+        .drop-zone-sm { padding: 1.2rem; }
+        .drop-zone-sm .drop-zone-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+        .drop-zone-sm .drop-zone-text { font-size: 0.85rem; }
+        .drop-zone-sm .drop-zone-hint { font-size: 0.75rem; }
+
+        /* Buttons */
+        .btn {
+            font-family: var(--font-display); font-weight: 600; border: none; border-radius: var(--radius-sm);
+            padding: 0.7rem 1.8rem; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(74, 124, 255, 0.25); }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 1.2rem 2rem; text-align: center; }
+        .footer-version { color: var(--text-muted); font-size: 0.75rem; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <a class="top-bar-link" href="#">
+                <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                GitHub
+            </a>
+            <a class="top-bar-link" href="#">
+                <svg viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h11A1.5 1.5 0 0 1 15 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-11z" fill="currentColor"/><path d="M3.5 6h4v1h-4V6zm0 2h4v1h-4V8zm0 2h4v1h-4v-1zm5.5-4h3.5v5H9V6z" fill="currentColor"/></svg>
+                Workshop
+            </a>
+        </div>
+        <div class="lang-area">
+            <span class="lang-label">Language</span>
+            <button class="lang-toggle" onclick="toggleLang()">EN</button>
+            <span class="lang-hint">모든 텍스트·샘플·보고서 변경<br>All text, samples &amp; reports change</span>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-logo-wrap">
+            <div style="width:80px;height:80px;border-radius:18px;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;justify-content:center;font-size:2.5rem;box-shadow:0 6px 30px rgba(74,124,255,0.4)">
+                <svg width="50" height="50" viewBox="0 0 100 100"><circle cx="50" cy="40" r="25" fill="none" stroke="#4a7cff" stroke-width="3"/><path d="M38 60 L50 80 L62 60" fill="none" stroke="#4a7cff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="40" r="8" fill="#4a7cff" opacity="0.3"/></svg>
+            </div>
+            <h1 class="hero-title">Deep Insight</h1>
+        </div>
+        <p class="hero-tagline"><span id="tagline-prefix">A platform for building diverse agent applications including reporting — </span><span class="highlight" id="tagline-highlight">Custom Agent Builder</span></p>
+        <p class="hero-subtitle">Built on Strands Agent &amp; Amazon Bedrock AgentCore</p>
+        <p class="hero-learn"><a href="#" id="hero-learn-link">Explore the architecture &amp; code, and build your own agent →</a></p>
+    </section>
+
+    <main>
+        <!-- Guide (transparent, no border) -->
+        <div class="card" id="guide-card">
+            <div class="guide-header">
+                <h2 id="guide-title-text">QUICK START GUIDE</h2>
+                <span class="guide-arrow">▾</span>
+            </div>
+            <div class="guide-body">
+                <div class="callout callout-amber" style="margin-bottom:0.5rem">
+                    <span class="callout-icon">🌐</span>
+                    <span id="browser-hint">Chrome browser is recommended</span>
+                </div>
+                <div class="callout callout-blue" style="margin-bottom:0.5rem">
+                    <span class="callout-icon">🔒</span>
+                    <span id="security-note">Uploaded data and generated reports are stored in your S3 bucket. The frontend is restricted to internal company IP ranges, and the backend runs in a private VPC. Your data is securely managed.</span>
+                </div>
+                <ol class="guide-steps">
+                    <li><span class="step-icon">📂</span><span id="step1">Upload your data file (CSV, Excel, etc.) and column definitions</span></li>
+                    <li><span class="step-icon">✏️</span><span id="step2">Enter an analysis prompt describing what you want to analyze</span></li>
+                    <li><span class="step-icon">📋</span><span id="step3">Review the analysis plan when prompted and approve or request changes</span></li>
+                    <li><span class="step-icon">⏳</span><span id="step4">Wait for the agents to complete the analysis</span></li>
+                    <li><span class="step-icon">📥</span><span id="step5">Download the generated reports from the Reports section</span></li>
+                </ol>
+                <div class="callout callout-blue" style="margin-top:0.6rem;margin-bottom:0.2rem">
+                    <span class="callout-icon">💡</span>
+                    <span id="coldef-tip">Column definitions are optional but recommended. Column names may have domain-specific meanings (e.g., sales = net vs gross), and you can define formulas to apply during analysis.</span>
+                </div>
+                <div class="callout callout-amber" style="margin-top:0.8rem">
+                    <span class="callout-icon">⏱</span>
+                    <span id="time-note">Elapsed time varies by prompt complexity, data size, and LLM server load. For sample data, it may take approximately 15-30 minutes.</span>
+                </div>
+                <hr class="guide-divider">
+                <div class="sample-data-section">
+                    <h3 id="sample-title">SAMPLE DATA</h3>
+                    <div class="callout callout-blue">
+                        <span class="callout-icon">💡</span>
+                        <span id="sample-hint">If you don't have data prepared or want to try a test run, download the sample CSV and column definition JSON files below, then upload them</span>
+                    </div>
+                    <a class="sample-link" href="#">column_definitions.json</a>
+                    <a class="sample-link" href="#">moon-market-fresh-food-sales.csv</a>
+                </div>
+                <hr class="guide-divider">
+                <div class="sample-data-section">
+                    <h3 id="reports-title">SAMPLE REPORTS</h3>
+                    <div class="callout callout-blue" style="margin-bottom:0.6rem">
+                        <span class="callout-icon">📄</span>
+                        <span id="reports-hint">Example reports generated from the sample data above. Preview what analysis results look like.</span>
+                    </div>
+                    <a class="sample-link" href="#">260218_en_moon_market_final_report_with_citations.docx</a>
+                </div>
+                <hr class="guide-divider">
+                <div class="sample-data-section">
+                    <h3 id="learn-title">LEARN TO BUILD</h3>
+                    <div class="callout callout-blue" style="margin-bottom:0.6rem">
+                        <span class="callout-icon">🛠️</span>
+                        <span id="learn-desc">Deep Insight is open-source. Learn how to build your own multi-agent system through the hands-on workshop and source code.</span>
+                    </div>
+                    <a class="sample-link" href="#">🎓 Hands-on Workshop</a>
+                    <a class="sample-link" href="#">💻 Source Code (GitHub)</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section divider -->
+        <div class="section-divider">
+            <span class="section-divider-text" id="section-start">Get Started</span>
+        </div>
+
+        <!-- Upload (execution zone - has card border) -->
+        <div class="card">
+            <h2 id="upload-title">UPLOAD DATA</h2>
+            <div class="field">
+                <label><span id="data-label">Data file</span><span class="req">*</span></label>
+                <div class="drop-zone">
+                    <div class="drop-zone-icon">📂</div>
+                    <div class="drop-zone-text">
+                        <span id="drop-text">Drag &amp; drop your file here or </span><span class="browse" id="drop-browse">click to browse</span>
+                    </div>
+                    <div class="drop-zone-hint" id="data-hint">CSV, Excel, TSV, TXT, or JSON</div>
+                </div>
+            </div>
+            <div class="field">
+                <label><span id="coldef-label">Column Definitions</span> <span class="tag-recommended" id="coldef-tag">Recommended</span></label>
+                <div class="drop-zone drop-zone-sm">
+                    <div class="drop-zone-icon">📄</div>
+                    <div class="drop-zone-text">
+                        <span id="coldef-drop">Drop your JSON file here or </span><span class="browse">click to browse</span>
+                    </div>
+                    <div class="drop-zone-hint" id="coldef-hint">JSON file defining domain-specific column meanings and formulas</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="upload-btn-text">Upload</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-version">Deep Insight v1.2.0</div>
+    </footer>
+
+    <script>
+        let lang = "ko";
+        const t = {
+            ko: {
+                langBtn: "EN",
+                langHint: "모든 텍스트·샘플·보고서 변경\nAll text, samples & reports change",
+                taglinePrefix: "리포팅 등의 다양한 에이전트 응용 개발 위한 ",
+                taglineHighlight: "커스텀 에이전트 구축 플랫폼",
+                heroLearn: "안전한 오픈소스 아키텍처와 코드를 통해 나만의 에이전트를 구축하세요",
+                guideTitle: "사용 가이드",
+                browserHint: "Chrome 브라우저 사용을 권장합니다",
+                securityNote: "업로드된 데이터와 생성된 보고서는 고객의 S3 버킷에 저장되며, 프론트엔드는 사내 IP 대역으로 제한되고 백엔드는 프라이빗 VPC에서 운영됩니다. 데이터는 안전하게 관리됩니다.",
+                step1: "데이터 파일(CSV, Excel 등)과 컬럼 정의 파일을 업로드합니다",
+                step2: "분석 프롬프트를 입력합니다",
+                step3: "분석 계획이 표시되면 승인하거나 수정을 요청합니다",
+                step4: "에이전트가 분석을 완료할 때까지 기다립니다",
+                step5: "Reports 섹션에서 생성된 보고서를 다운로드합니다",
+                coldefTip: "컬럼 정의 파일은 선택사항이지만 권장합니다. 컬럼명이 도메인 고유 의미를 가질 수 있으며(예: 매출 = 순매출 vs 총매출), 분석에 적용할 수식도 정의할 수 있습니다.",
+                timeNote: "소요 시간은 프롬프트 복잡도, 데이터 크기, LLM 서버 상태에 따라 달라집니다. 샘플 데이터 기준 약 15~30분 소요될 수 있습니다.",
+                sampleTitle: "샘플 데이터",
+                sampleHint: "데이터가 없거나 테스트 실행을 원하면 아래 샘플 CSV 파일과 컬럼 정의 JSON 파일을 다운로드한 후 업로드하세요",
+                reportsTitle: "샘플 보고서",
+                reportsHint: "위 샘플 데이터로 생성된 보고서 예시입니다. 분석 결과물이 어떤 형태인지 미리 확인해보세요.",
+                learnTitle: "직접 만들어보기",
+                learnDesc: "Deep Insight는 안전한 오픈소스 플랫폼입니다. 멀티 에이전트 시스템의 아키텍처를 이해하고 직접 구축하는 방법을 핸즈온 워크숍과 소스 코드를 통해 배워보세요.",
+                sectionStart: "시작하기",
+                uploadTitle: "데이터 업로드",
+                dataLabel: "데이터 파일",
+                dropText: "파일을 여기에 끌어다 놓거나 ",
+                dropBrowse: "클릭하여 선택",
+                dataHint: "CSV, Excel, TSV, TXT, JSON",
+                coldefLabel: "컬럼 정의",
+                coldefTag: "권장",
+                coldefDrop: "JSON 파일을 여기에 끌어다 놓거나 ",
+                coldefHint: "컬럼의 도메인 고유 의미와 수식을 정의하는 JSON 파일",
+                uploadBtn: "업로드",
+            },
+            en: {
+                langBtn: "KR",
+                langHint: "모든 텍스트·샘플·보고서 변경\nAll text, samples & reports change",
+                taglinePrefix: "A platform for building diverse agent applications including reporting — ",
+                taglineHighlight: "Custom Agent Builder",
+                heroLearn: "Build your own agent with our secure, open-source architecture and code",
+                guideTitle: "QUICK START GUIDE",
+                browserHint: "Chrome browser is recommended",
+                securityNote: "Uploaded data and generated reports are stored in your S3 bucket. The frontend is restricted to internal company IP ranges, and the backend runs in a private VPC. Your data is securely managed.",
+                step1: "Upload your data file (CSV, Excel, etc.) and column definitions",
+                step2: "Enter an analysis prompt describing what you want to analyze",
+                step3: "Review the analysis plan when prompted and approve or request changes",
+                step4: "Wait for the agents to complete the analysis",
+                step5: "Download the generated reports from the Reports section",
+                coldefTip: "Column definitions are optional but recommended. Column names may have domain-specific meanings (e.g., sales = net vs gross), and you can define formulas to apply during analysis.",
+                timeNote: "Elapsed time varies by prompt complexity, data size, and LLM server load. For sample data, it may take approximately 15-30 minutes.",
+                sampleTitle: "SAMPLE DATA",
+                sampleHint: "If you don't have data prepared or want to try a test run, download the sample CSV and column definition JSON files below, then upload them",
+                reportsTitle: "SAMPLE REPORTS",
+                reportsHint: "Example reports generated from the sample data above. Preview what analysis results look like.",
+                learnTitle: "LEARN TO BUILD",
+                learnDesc: "Deep Insight is a secure, open-source platform. Learn how to build your own multi-agent system through the hands-on workshop and source code.",
+                sectionStart: "Get Started",
+                uploadTitle: "UPLOAD DATA",
+                dataLabel: "Data file",
+                dropText: "Drag & drop your file here or ",
+                dropBrowse: "click to browse",
+                dataHint: "CSV, Excel, TSV, TXT, or JSON",
+                coldefLabel: "Column Definitions",
+                coldefTag: "Recommended",
+                coldefDrop: "Drop your JSON file here or ",
+                coldefHint: "JSON file defining domain-specific column meanings and formulas",
+                uploadBtn: "Upload",
+            }
+        };
+
+        function applyLang() {
+            const d = t[lang];
+            document.querySelector(".lang-toggle").textContent = d.langBtn;
+            document.querySelector(".lang-hint").textContent = d.langHint;
+            document.getElementById("tagline-prefix").textContent = d.taglinePrefix;
+            document.getElementById("tagline-highlight").textContent = d.taglineHighlight;
+            document.getElementById("hero-learn-link").textContent = d.heroLearn;
+            document.getElementById("guide-title-text").textContent = d.guideTitle;
+            document.getElementById("browser-hint").textContent = d.browserHint;
+            document.getElementById("security-note").textContent = d.securityNote;
+            document.getElementById("step1").textContent = d.step1;
+            document.getElementById("step2").textContent = d.step2;
+            document.getElementById("step3").textContent = d.step3;
+            document.getElementById("step4").textContent = d.step4;
+            document.getElementById("step5").textContent = d.step5;
+            document.getElementById("coldef-tip").textContent = d.coldefTip;
+            document.getElementById("time-note").textContent = d.timeNote;
+            document.getElementById("sample-title").textContent = d.sampleTitle;
+            document.getElementById("sample-hint").textContent = d.sampleHint;
+            document.getElementById("reports-title").textContent = d.reportsTitle;
+            document.getElementById("reports-hint").textContent = d.reportsHint;
+            document.getElementById("learn-title").textContent = d.learnTitle;
+            document.getElementById("learn-desc").textContent = d.learnDesc;
+            document.getElementById("section-start").textContent = d.sectionStart;
+            document.getElementById("upload-title").textContent = d.uploadTitle;
+            document.getElementById("data-label").textContent = d.dataLabel;
+            document.getElementById("drop-text").textContent = d.dropText;
+            document.getElementById("drop-browse").textContent = d.dropBrowse;
+            document.getElementById("data-hint").textContent = d.dataHint;
+            document.getElementById("coldef-label").textContent = d.coldefLabel;
+            document.getElementById("coldef-tag").textContent = d.coldefTag;
+            document.getElementById("coldef-drop").textContent = d.coldefDrop;
+            document.getElementById("coldef-hint").textContent = d.coldefHint;
+            document.getElementById("upload-btn-text").textContent = d.uploadBtn;
+        }
+
+        function toggleLang() {
+            lang = lang === "ko" ? "en" : "ko";
+            applyLang();
+        }
+
+        // Start with English
+        applyLang();
+    </script>
+</body>
+</html>

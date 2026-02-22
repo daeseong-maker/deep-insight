@@ -25,6 +25,9 @@ ENV/
 .DS_Store
 Thumbs.db
 
+# Temporary files
+deep-insight-web/static/tmp/
+
 # Logs
 *.log
 

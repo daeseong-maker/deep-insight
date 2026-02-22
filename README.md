@@ -19,7 +19,7 @@
 
 ## *Latest News* 🔥
 
-- **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](./docs/front-end/03-development-plan.md))
+- **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](https://github.com/aws-samples/sample-deep-insight/blob/main/deep-insight-web/README.md))
 - **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system.md))
 - **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow.md))
 - **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
@@ -92,7 +92,7 @@ Browser-based interface for non-technical users:
 - ✅ Upload data, review plans, download reports from the browser
 - ✅ Korean/English language support
 - ✅ Internet-facing ALB with VPN CIDR restriction
-**Get Started**: [`./deep-insight-web/`](./deep-insight-web/) | 📖 [Web UI README](./deep-insight-web/README.md)
+**Get Started**: [`./deep-insight-web/`](./deep-insight-web/)
 
 ## Deployment Options
 

@@ -19,6 +19,9 @@ from dotenv import load_dotenv
 import re
 from urllib.parse import quote
 
+from ops.job_tracker import track_job_start, track_job_link, track_job_failure
+from ops.admin_router import admin_router
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -47,6 +50,7 @@ PORT = 8080
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.include_router(admin_router)
 
 
 # ---------- Feature 1: Health check ----------
@@ -55,12 +59,7 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 @app.get("/health")
 def health():
     """ALB health check endpoint."""
-    return {
-        "status": "healthy",
-        "runtime_arn": RUNTIME_ARN[:50] + "..." if len(RUNTIME_ARN) > 50 else RUNTIME_ARN,
-        "region": AWS_REGION,
-        "s3_bucket": S3_BUCKET_NAME,
-    }
+    return {"status": "healthy"}
 
 
 # ---------- Sample data endpoints ----------
@@ -230,7 +229,7 @@ async def upload(
 # ---------- Feature 4: Analysis + SSE streaming ----------
 
 
-def agentcore_sse_generator(query: str, data_directory: str):
+def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""):
     """Call AgentCore Runtime and yield SSE events for the browser."""
     if not RUNTIME_ARN:
         yield format_sse({"type": "error", "text": "RUNTIME_ARN not configured"})
@@ -276,12 +275,14 @@ def agentcore_sse_generator(query: str, data_directory: str):
                     "timeout_seconds": event_data.get("timeout_seconds", 300),
                 })
             elif event_type == "workflow_complete":
+                session_id = event_data.get("session_id", "")
                 yield format_sse({
                     "type": "workflow_complete",
                     "text": event_data.get("text", ""),
-                    "session_id": event_data.get("session_id", ""),
+                    "session_id": session_id,
                     "filenames": event_data.get("filenames", []),
                 })
+                track_job_link(upload_id, session_id)
             else:
                 text = event_data.get("text") or event_data.get("data") or ""
                 yield format_sse({"type": event_type, "text": text})
@@ -291,6 +292,7 @@ def agentcore_sse_generator(query: str, data_directory: str):
     except Exception as e:
         logger.error(f"AgentCore invocation error: {e}")
         yield format_sse({"type": "error", "text": str(e)})
+        track_job_failure(upload_id, str(e))
 
 
 @app.post("/analyze")
@@ -298,8 +300,9 @@ def analyze(request: AnalyzeRequest):
     """Invoke AgentCore Runtime and relay SSE events to the browser."""
     data_directory = f"s3://{S3_BUCKET_NAME}/uploads/{request.upload_id}/"
     logger.info(f"Analyze request: upload_id={request.upload_id}, query={request.query[:80]}...")
+    track_job_start(request.upload_id, request.query)
     return StreamingResponse(
-        agentcore_sse_generator(request.query, data_directory),
+        agentcore_sse_generator(request.query, data_directory, request.upload_id),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
     )

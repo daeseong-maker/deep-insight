@@ -80,6 +80,8 @@ The script handles all infrastructure in a single run:
 | Download | `GET /download/{session_id}/{filename}` | Download a report file |
 
 > For detailed feature specifications, see the [Development Plan](../docs/front-end/03-development-plan.md).
+>
+> For Ops Admin (job tracking, notifications, dashboard), see the [Ops Deployment Guide](ops/README.md).
 
 ---
 

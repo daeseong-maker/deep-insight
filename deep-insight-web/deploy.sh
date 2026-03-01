@@ -446,48 +446,71 @@ echo "Log Group: ${LOG_GROUP}"
 # ---------- Step 7: ECS Task Definition ----------
 
 echo "=== Step 7: ECS Task Definition ==="
-TASK_DEF=$(cat <<TASKDEF
-{
-    "family": "${TASK_FAMILY}",
-    "networkMode": "awsvpc",
-    "requiresCompatibilities": ["FARGATE"],
-    "runtimePlatform": {
-        "cpuArchitecture": "ARM64",
-        "operatingSystemFamily": "LINUX"
+
+# Base env vars (always set by deploy.sh)
+BASE_ENV='[
+    {"name": "RUNTIME_ARN", "value": "'"${RUNTIME_ARN_VALUE}"'"},
+    {"name": "AWS_REGION", "value": "'"${REGION}"'"},
+    {"name": "S3_BUCKET_NAME", "value": "'"${S3_BUCKET}"'"}
+]'
+
+# Preserve env vars added by deploy_ops.sh (e.g., DYNAMODB_TABLE_NAME, SNS_TOPIC_ARN)
+CURRENT_ENV=$(aws ecs describe-task-definition --task-definition "$TASK_FAMILY" \
+    --region "$REGION" \
+    --query "taskDefinition.containerDefinitions[0].environment" --output json 2>/dev/null || echo "[]")
+
+MERGED_ENV=$(python3 -c "
+import json, sys
+base = json.loads(sys.argv[1])
+current = json.loads(sys.argv[2])
+base_names = {e['name'] for e in base}
+merged = list(base)
+for e in current:
+    if e['name'] not in base_names:
+        merged.append(e)
+json.dump(merged, sys.stdout)
+" "$BASE_ENV" "$CURRENT_ENV")
+
+TASK_DEF_FILE="/tmp/deep-insight-web-task-def.json"
+python3 -c "
+import json, sys
+env = json.loads(sys.argv[1])
+td = {
+    'family': '${TASK_FAMILY}',
+    'networkMode': 'awsvpc',
+    'requiresCompatibilities': ['FARGATE'],
+    'runtimePlatform': {
+        'cpuArchitecture': 'ARM64',
+        'operatingSystemFamily': 'LINUX'
     },
-    "cpu": "256",
-    "memory": "512",
-    "executionRoleArn": "${EXECUTION_ROLE_ARN}",
-    "taskRoleArn": "${TASK_ROLE_ARN_VALUE}",
-    "containerDefinitions": [
-        {
-            "name": "deep-insight-web",
-            "image": "${ECR_URI}:${IMAGE_TAG}",
-            "portMappings": [{"containerPort": 8080, "protocol": "tcp"}],
-            "environment": [
-                {"name": "RUNTIME_ARN", "value": "${RUNTIME_ARN_VALUE}"},
-                {"name": "AWS_REGION", "value": "${REGION}"},
-                {"name": "S3_BUCKET_NAME", "value": "${S3_BUCKET}"}
-            ],
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "${LOG_GROUP}",
-                    "awslogs-region": "${REGION}",
-                    "awslogs-stream-prefix": "web"
-                }
-            },
-            "essential": true
-        }
-    ]
+    'cpu': '256',
+    'memory': '512',
+    'executionRoleArn': '${EXECUTION_ROLE_ARN}',
+    'taskRoleArn': '${TASK_ROLE_ARN_VALUE}',
+    'containerDefinitions': [{
+        'name': 'deep-insight-web',
+        'image': '${ECR_URI}:${IMAGE_TAG}',
+        'portMappings': [{'containerPort': 8080, 'protocol': 'tcp'}],
+        'environment': env,
+        'logConfiguration': {
+            'logDriver': 'awslogs',
+            'options': {
+                'awslogs-group': '${LOG_GROUP}',
+                'awslogs-region': '${REGION}',
+                'awslogs-stream-prefix': 'web'
+            }
+        },
+        'essential': True
+    }]
 }
-TASKDEF
-)
+json.dump(td, sys.stdout)
+" "$MERGED_ENV" > "$TASK_DEF_FILE"
 
 TASK_DEF_ARN=$(aws ecs register-task-definition \
-    --cli-input-json "$TASK_DEF" \
+    --cli-input-json "file://${TASK_DEF_FILE}" \
     --region "$REGION" \
     --query "taskDefinition.taskDefinitionArn" --output text)
+rm -f "$TASK_DEF_FILE"
 echo "Task Definition: ${TASK_DEF_ARN}"
 
 # ---------- Step 8: ECS Service ----------

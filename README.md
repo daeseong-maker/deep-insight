@@ -19,6 +19,7 @@
 
 ## *Latest News* 🔥
 
+- **[2026/03]** Ops Dashboard - job tracking, email notifications, and admin dashboard with Cognito authentication ([details](./deep-insight-web/ops/README.md))
 - **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](https://github.com/aws-samples/sample-deep-insight/blob/main/deep-insight-web/README.md))
 - **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system.md))
 - **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow.md))
@@ -92,6 +93,8 @@ Browser-based interface for non-technical users:
 - ✅ Upload data, review plans, download reports from the browser
 - ✅ Korean/English language support
 - ✅ Internet-facing ALB with VPN CIDR restriction
+- ✅ Optional: Ops dashboard for job tracking and email notifications
+
 **Get Started**: [`./deep-insight-web/`](./deep-insight-web/)
 
 ## Deployment Options
@@ -173,11 +176,11 @@ We believe in the power of open collaboration. Deep Insight takes the excellent 
 
 | Name | Role | Contact |
 |------|------|---------|
-| **Dongjin Jang, Ph.D.** | AWS Sr. AI/ML Specialist SA | [Email](mailto:dongjinj@amazon.com) · [LinkedIn](https://www.linkedin.com/in/dongjin-jang-kr/) · [GitHub](https://github.com/dongjin-ml) · [Hugging Face](https://huggingface.co/Dongjin-kr) |
 | **Gonsoo Moon** | AWS Sr. AI/ML Specialist SA | [Email](mailto:moongons@amazon.com) · [LinkedIn](https://www.linkedin.com/in/gonsoomoon) · [GitHub](https://github.com/gonsoomoon-ml) · [Hugging Face](https://huggingface.co/Gonsoo) |
 | **Chloe(Younghwa) Kwak** | AWS Sr. Solutions Architect | [Email](mailto:younghwa@amazon.com) · [LinkedIn](https://www.linkedin.com/in/younghwakwak) · [GitHub](https://github.com/chloe-kwak) · [Hugging Face](https://huggingface.co/Chloe-yh) |
 | **Yoonseo Kim** | AWS Solutions Architect | [Email](mailto:ottlseo@amazon.com) · [LinkedIn](https://www.linkedin.com/in/ottlseo/) · [GitHub](https://github.com/ottlseo) |
 | **Jiyun Park** | AWS Solutions Architect | [Email](mailto:jiyunp@amazon.com) · [LinkedIn](https://www.linkedin.com/in/jiyunpark1128/) · [GitHub](https://github.com/glossyyoon) |
+| **Dongjin Jang, Ph.D.** | Previous AWS Sr. AI/ML Specialist SA | [Email](mailto:dongjinj@amazon.com) · [LinkedIn](https://www.linkedin.com/in/dongjin-jang-kr/) · [GitHub](https://github.com/dongjin-ml) · [Hugging Face](https://huggingface.co/Dongjin-kr) 
 
 ---
 

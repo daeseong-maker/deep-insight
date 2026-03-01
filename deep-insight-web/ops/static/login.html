@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Insight — Admin Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0d0f13;
+            --bg-surface: #161921;
+            --bg-card: #1c2029;
+            --bg-elevated: #232833;
+            --border: #2a2f3a;
+            --border-hover: #3d445a;
+            --text-primary: #e8eaf0;
+            --text-secondary: #dce0eb;
+            --text-muted: #a8b2c8;
+            --accent: #4a7cff;
+            --accent-glow: rgba(74, 124, 255, 0.15);
+            --accent-hover: #6190ff;
+            --red: #f87171;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --font-display: 'Outfit', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-display);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lang-area {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .lang-label { color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; }
+        .lang-toggle {
+            padding: 0.35rem 0.9rem;
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(74, 124, 255, 0.3);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-toggle:hover { color: var(--text-primary); border-color: var(--accent); background: rgba(74, 124, 255, 0.2); }
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            border-color: var(--accent);
+        }
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 0.5rem;
+        }
+        .btn:hover { background: var(--accent-hover); }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .error-msg {
+            color: var(--red);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .password-hint {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--accent); }
+        .login-hint {
+            background: var(--accent-glow);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 0.9rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+        .login-hint-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.15rem;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="lang-area">
+        <span class="lang-label">Language</span>
+        <button class="lang-toggle" id="admin-lang-toggle" onclick="toggleAdminLang()">EN</button>
+    </div>
+
+    <!-- Login Form -->
+    <div class="login-card" id="loginForm">
+        <div class="login-title" data-i18n="login_title">Deep Insight Admin</div>
+        <div class="login-subtitle" data-i18n="login_subtitle">Sign in to the admin console</div>
+
+        <div class="login-hint">
+            <div class="login-hint-title" data-i18n="login_hint_title">First time signing in?</div>
+            <div data-i18n="login_hint_body">Use the temporary password from your Cognito welcome email.</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="username" data-i18n="login_email">Email</label>
+            <input class="form-input" id="username" type="email" placeholder="admin@example.com" data-i18n-placeholder="login_email_ph" autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password" data-i18n="login_password">Password</label>
+            <input class="form-input" id="password" type="password" placeholder="Enter password" data-i18n-placeholder="login_password_ph" autocomplete="current-password">
+        </div>
+        <button class="btn" id="loginBtn" onclick="handleLogin()" data-i18n="login_btn">Sign In</button>
+        <div class="error-msg" id="loginError"></div>
+        <a href="/" class="back-link" data-i18n="login_back">Back to Deep Insight</a>
+    </div>
+
+    <!-- Change Password Form (first login) -->
+    <div class="login-card hidden" id="changePasswordForm">
+        <div class="login-title" data-i18n="change_title">Set New Password</div>
+        <div class="login-subtitle" data-i18n="change_subtitle">Your temporary password must be changed on first login</div>
+
+        <div class="form-group">
+            <label class="form-label" for="newPassword" data-i18n="change_new">New Password</label>
+            <input class="form-input" id="newPassword" type="password" placeholder="Enter new password" data-i18n-placeholder="change_new_ph" autocomplete="new-password">
+            <div class="password-hint" data-i18n="change_hint">Min 12 characters, uppercase, lowercase, number, symbol</div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="confirmPassword" data-i18n="change_confirm">Confirm Password</label>
+            <input class="form-input" id="confirmPassword" type="password" placeholder="Confirm new password" data-i18n-placeholder="change_confirm_ph" autocomplete="new-password">
+        </div>
+        <button class="btn" id="changeBtn" onclick="handleChangePassword()" data-i18n="change_btn">Set Password</button>
+        <div class="error-msg" id="changeError"></div>
+    </div>
+
+    <script src="/admin/static/admin-i18n.js"></script>
+    <script>
+        let challengeSession = '';
+        let challengeUsername = '';
+
+        // Enter key submits form
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('confirmPassword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleChangePassword();
+        });
+
+        async function handleLogin() {
+            var username = document.getElementById('username').value.trim();
+            var password = document.getElementById('password').value;
+            var errorEl = document.getElementById('loginError');
+            var btn = document.getElementById('loginBtn');
+
+            if (!username || !password) {
+                errorEl.textContent = t('login_err_empty');
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = t('login_btn_loading');
+            errorEl.style.display = 'none';
+
+            try {
+                var res = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, password: password }),
+                });
+
+                var data = await res.json();
+
+                if (data.challenge === 'NEW_PASSWORD_REQUIRED') {
+                    challengeSession = data.session;
+                    challengeUsername = data.username;
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('changePasswordForm').classList.remove('hidden');
+                    document.getElementById('newPassword').focus();
+                    return;
+                }
+
+                if (data.success) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+
+                errorEl.textContent = data.detail || t('login_err_failed');
+                errorEl.style.display = 'block';
+            } catch (e) {
+                errorEl.textContent = t('login_err_connection');
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = t('login_btn');
+            }
+        }
+
+        async function handleChangePassword() {
+            var newPassword = document.getElementById('newPassword').value;
+            var confirmPassword = document.getElementById('confirmPassword').value;
+            var errorEl = document.getElementById('changeError');
+            var btn = document.getElementById('changeBtn');
+
+            if (!newPassword) {
+                errorEl.textContent = t('change_err_empty');
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                errorEl.textContent = t('change_err_mismatch');
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = t('change_btn_loading');
+            errorEl.style.display = 'none';
+
+            try {
+                var res = await fetch('/admin/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: challengeUsername,
+                        session: challengeSession,
+                        new_password: newPassword,
+                    }),
+                });
+
+                var data = await res.json();
+
+                if (data.success) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+
+                errorEl.textContent = data.detail || t('change_err_failed');
+                errorEl.style.display = 'block';
+            } catch (e) {
+                errorEl.textContent = t('change_err_connection');
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = t('change_btn');
+            }
+        }
+
+        applyAdminLang();
+    </script>
+</body>
+</html>

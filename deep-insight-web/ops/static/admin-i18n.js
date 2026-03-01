@@ -1,0 +1,198 @@
+// ==================== Admin i18n ====================
+const adminI18n = {
+    en: {
+        // Shared header
+        admin_title: 'Deep Insight Admin',
+        admin_badge: 'Admin',
+        admin_webui: 'Web UI',
+        admin_logout: 'Logout',
+        admin_all_jobs: 'All Jobs',
+        admin_refresh: 'Auto-refresh: 30s',
+
+        // Login
+        login_title: 'Deep Insight Admin',
+        login_subtitle: 'Sign in to the admin console',
+        login_email: 'Email',
+        login_email_ph: 'admin@example.com',
+        login_password: 'Password',
+        login_password_ph: 'Enter password',
+        login_btn: 'Sign In',
+        login_btn_loading: 'Signing in...',
+        login_back: 'Back to Deep Insight',
+        login_err_empty: 'Please enter email and password',
+        login_hint_title: 'First time signing in?',
+        login_hint_body: 'Use the temporary password from your Cognito welcome email.',
+        login_err_connection: 'Connection error',
+        login_err_failed: 'Login failed',
+
+        // Change password
+        change_title: 'Set New Password',
+        change_subtitle: 'Your temporary password must be changed on first login',
+        change_new: 'New Password',
+        change_new_ph: 'Enter new password',
+        change_hint: 'Min 12 characters, uppercase, lowercase, number, symbol',
+        change_confirm: 'Confirm Password',
+        change_confirm_ph: 'Confirm new password',
+        change_btn: 'Set Password',
+        change_btn_loading: 'Setting password...',
+        change_err_empty: 'Please enter a new password',
+        change_err_mismatch: 'Passwords do not match',
+        change_err_connection: 'Connection error',
+        change_err_failed: 'Password change failed',
+
+        // Jobs list
+        filter_all: 'All',
+        filter_start: 'Start',
+        filter_success: 'Success',
+        filter_failed: 'Failed',
+        th_status: 'Status',
+        th_query: 'Query',
+        th_started: 'Started',
+        th_duration: 'Duration',
+        th_tokens: 'Tokens',
+        th_cache_hit: 'Cache Hit',
+        th_report: 'Report',
+        status_start: 'Start',
+        status_success: 'Success',
+        status_failed: 'Failed',
+        jobs_empty: 'No jobs found',
+        jobs_running: 'running...',
+        jobs_stale: 'STALE',
+
+        // Job detail
+        back_all_jobs: 'Back to all jobs',
+        detail_title: 'Job Detail',
+        detail_loading: 'Loading job details...',
+        detail_not_found: 'Job not found',
+        detail_load_error: 'Failed to load job details',
+        label_job_id: 'Job ID',
+        label_query: 'Query',
+        label_session_id: 'Session ID',
+        label_started: 'Started',
+        label_completed: 'Completed',
+        label_duration: 'Duration',
+        label_total_tokens: 'Total Tokens',
+        label_input_tokens: 'Input Tokens',
+        label_output_tokens: 'Output Tokens',
+        label_cache_read: 'Cache Read',
+        label_cache_write: 'Cache Write',
+        label_cache_hit: 'Cache Hit',
+        label_report: 'Report',
+        label_error: 'Error',
+    },
+    ko: {
+        // Shared header
+        admin_title: 'Deep Insight 관리자',
+        admin_badge: '관리자',
+        admin_webui: '웹 UI',
+        admin_logout: '로그아웃',
+        admin_all_jobs: '전체 목록',
+        admin_refresh: '자동 갱신: 30초',
+
+        // Login
+        login_title: 'Deep Insight 관리자',
+        login_subtitle: '관리자 콘솔에 로그인하세요',
+        login_email: '이메일',
+        login_email_ph: 'admin@example.com',
+        login_password: '비밀번호',
+        login_password_ph: '비밀번호를 입력하세요',
+        login_btn: '로그인',
+        login_btn_loading: '로그인 중...',
+        login_back: 'Deep Insight로 돌아가기',
+        login_err_empty: '이메일과 비밀번호를 입력하세요',
+        login_hint_title: '처음 로그인하시나요?',
+        login_hint_body: 'Cognito 환영 이메일의 임시 비밀번호를 사용하세요.',
+        login_err_connection: '연결 오류',
+        login_err_failed: '로그인 실패',
+
+        // Change password
+        change_title: '새 비밀번호 설정',
+        change_subtitle: '첫 로그인 시 임시 비밀번호를 변경해야 합니다',
+        change_new: '새 비밀번호',
+        change_new_ph: '새 비밀번호를 입력하세요',
+        change_hint: '최소 12자, 대문자, 소문자, 숫자, 특수문자 포함',
+        change_confirm: '비밀번호 확인',
+        change_confirm_ph: '새 비밀번호를 다시 입력하세요',
+        change_btn: '비밀번호 설정',
+        change_btn_loading: '비밀번호 설정 중...',
+        change_err_empty: '새 비밀번호를 입력하세요',
+        change_err_mismatch: '비밀번호가 일치하지 않습니다',
+        change_err_connection: '연결 오류',
+        change_err_failed: '비밀번호 변경 실패',
+
+        // Jobs list
+        filter_all: '전체',
+        filter_start: '시작',
+        filter_success: '성공',
+        filter_failed: '실패',
+        th_status: '상태',
+        th_query: '쿼리',
+        th_started: '시작 시각',
+        th_duration: '소요 시간',
+        th_tokens: '토큰',
+        th_cache_hit: '캐시 적중률',
+        th_report: '보고서',
+        status_start: '시작',
+        status_success: '성공',
+        status_failed: '실패',
+        jobs_empty: '조회된 작업이 없습니다',
+        jobs_running: '실행 중...',
+        jobs_stale: '지연',
+
+        // Job detail
+        back_all_jobs: '전체 목록으로 돌아가기',
+        detail_title: '작업 상세',
+        detail_loading: '작업 정보를 불러오는 중...',
+        detail_not_found: '작업을 찾을 수 없습니다',
+        detail_load_error: '작업 정보를 불러오지 못했습니다',
+        label_job_id: '작업 ID',
+        label_query: '쿼리',
+        label_session_id: '세션 ID',
+        label_started: '시작 시각',
+        label_completed: '완료 시각',
+        label_duration: '소요 시간',
+        label_total_tokens: '총 토큰',
+        label_input_tokens: '입력 토큰',
+        label_output_tokens: '출력 토큰',
+        label_cache_read: '캐시 읽기',
+        label_cache_write: '캐시 쓰기',
+        label_cache_hit: '캐시 적중률',
+        label_report: '보고서',
+        label_error: '오류',
+    }
+};
+
+let adminLang = localStorage.getItem('adminLang') || 'ko';
+
+/** Get translated string by key */
+function t(key) {
+    return adminI18n[adminLang][key] || adminI18n['en'][key] || key;
+}
+
+/** Toggle between Korean and English */
+function toggleAdminLang() {
+    adminLang = adminLang === 'ko' ? 'en' : 'ko';
+    localStorage.setItem('adminLang', adminLang);
+    applyAdminLang();
+}
+
+/** Apply current language to all data-i18n elements */
+function applyAdminLang() {
+    var btn = document.getElementById('admin-lang-toggle');
+    if (btn) btn.textContent = adminLang === 'ko' ? 'EN' : 'KR';
+
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        var val = adminI18n[adminLang][key];
+        if (val !== undefined) el.textContent = val;
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-placeholder');
+        var val = adminI18n[adminLang][key];
+        if (val !== undefined) el.placeholder = val;
+    });
+
+    // Call page-specific re-render if defined
+    if (typeof onLangChange === 'function') onLangChange();
+}

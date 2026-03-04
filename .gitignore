@@ -28,6 +28,7 @@ Thumbs.db
 # Temporary files
 deep-insight-web/static/tmp/
 tmp/
+managed-agentcore/artifacts/
 under_development/
 
 # Logs

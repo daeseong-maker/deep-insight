@@ -182,7 +182,8 @@ save_docx(doc, './artifacts/final_report_with_citations.docx')
 doc2 = Document('./artifacts/final_report_with_citations.docx')
 for para in doc2.paragraphs:
     for run in para.runs:
-        run.text = re.sub(r'\\[\\d+\\]', '', run.text)
+        for t_elem in run._element.findall(qn('w:t')):
+            t_elem.text = re.sub(r'\\[\\d+\\]', '', t_elem.text or '')
 
 # Remove references section
 to_remove, found = [], False

@@ -19,6 +19,7 @@
 
 ## *Latest News* 🔥
 
+- **[2026/04]** CloudFront + Cognito deployment option for Web UI — HTTPS with Lambda@Edge authentication for external demos and customer PoCs ([details](./deep-insight-web/README.md))
 - **[2026/03]** Ops Dashboard - job tracking, email notifications, and admin dashboard with Cognito authentication ([details](./deep-insight-web/ops/README.md))
 - **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](https://github.com/aws-samples/sample-deep-insight/blob/main/deep-insight-web/README.md))
 - **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system.md))
@@ -92,7 +93,7 @@ Production deployment using AWS Bedrock AgentCore Runtime with VPC Private Mode:
 Browser-based interface for non-technical users:
 - ✅ Upload data, review plans, download reports from the browser
 - ✅ Korean/English language support
-- ✅ Internet-facing ALB with VPN CIDR restriction
+- ✅ Two deployment options: VPN CIDR (internal) or CloudFront + Cognito (external)
 - ✅ Optional: Ops dashboard for job tracking and email notifications
 
 **Get Started**: [`./deep-insight-web/`](./deep-insight-web/)
@@ -104,7 +105,7 @@ Browser-based interface for non-technical users:
 | Setup Time | ~10 minutes | ~45 minutes | ~15 minutes (after Managed) |
 | Agent Hosting | Local/EC2 | Bedrock AgentCore Runtime | Same as Managed |
 | Code Execution | Local Python | Custom Code Interpreter (Fargate) | Same as Managed |
-| Network | Your choice | 100% Private VPC | VPN-restricted ALB |
+| Network | Your choice | 100% Private VPC | VPN CIDR or CloudFront + Cognito |
 | Best For | Development, Testing | Production, Enterprise | Non-technical Users |
 
 > 📖 **[Detailed comparison →](./managed-agentcore/production_deployment/docs/DEPLOYMENT_COMPARISON.md)** Security, cost, features, and when to choose each option

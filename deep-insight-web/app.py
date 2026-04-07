@@ -231,16 +231,16 @@ async def upload(
 # ---------- Feature 4: Analysis + SSE streaming ----------
 
 
-# SSE keepalive 주기 (초). CloudFront 기본 Origin Read Timeout(60초) 내에
-# 반드시 데이터가 전송되어야 연결이 유지됨. 30초면 충분한 여유가 있음.
+# SSE keepalive interval in seconds. Must be shorter than CloudFront's default
+# Origin Read Timeout (60s) to prevent proxy idle disconnections.
 SSE_KEEPALIVE_INTERVAL = 30
 
 
 def _read_agentcore_events(response, event_queue):
-    """AgentCore SSE 스트림을 읽어서 queue에 넣는 백그라운드 스레드 함수.
+    """Read AgentCore SSE stream in a background thread and enqueue parsed events.
 
-    iter_lines()는 blocking 호출이므로 별도 스레드에서 실행해야
-    메인 generator가 keepalive를 보낼 수 있음.
+    iter_lines() is a blocking call, so it must run in a separate thread
+    to allow the main generator to yield keepalive comments.
     """
     try:
         for event_bytes in response["response"].iter_lines(chunk_size=1):
@@ -250,15 +250,16 @@ def _read_agentcore_events(response, event_queue):
     except Exception as e:
         event_queue.put({"type": "error", "text": str(e)})
     finally:
-        event_queue.put(None)  # 스트림 종료 신호
+        event_queue.put(None)  # End-of-stream sentinel
 
 
 def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""):
-    """AgentCore Runtime을 호출하고 브라우저로 SSE 이벤트를 전송.
+    """Call AgentCore Runtime and yield SSE events for the browser.
 
-    CloudFront/프록시 환경에서 idle timeout으로 연결이 끊기는 것을 방지하기 위해
-    SSE_KEEPALIVE_INTERVAL마다 SSE comment(": keepalive")를 전송함.
-    SSE 스펙에 의해 브라우저는 comment를 무시하므로 기능에 영향 없음.
+    To prevent proxy idle timeout disconnections (e.g., CloudFront Origin Read
+    Timeout of 60s), this generator sends an SSE comment (": keepalive") every
+    SSE_KEEPALIVE_INTERVAL seconds when no real events are available.
+    Browsers ignore SSE comments per the W3C spec, so this has no side effects.
     """
     if not RUNTIME_ARN:
         yield format_sse({"type": "error", "text": "RUNTIME_ARN not configured"})
@@ -281,8 +282,8 @@ def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""
             yield format_sse({"type": "error", "text": f"Unexpected content type: {content_type}"})
             return
 
-        # 백그라운드 스레드에서 AgentCore 이벤트를 읽고,
-        # 메인 generator는 keepalive를 보내면서 이벤트를 전달
+        # Read events in a background thread so the main generator can
+        # yield keepalive comments during long idle periods.
         event_queue = queue.Queue()
         reader_thread = threading.Thread(
             target=_read_agentcore_events, args=(response, event_queue), daemon=True
@@ -293,14 +294,20 @@ def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""
             try:
                 event_data = event_queue.get(timeout=SSE_KEEPALIVE_INTERVAL)
             except queue.Empty:
-                # 타임아웃: 실제 이벤트 없음 -> keepalive comment 전송
+                # No event within the interval — send SSE comment to keep
+                # the connection alive through proxies.
                 yield ": keepalive\n\n"
                 continue
 
             if event_data is None:
-                break  # 스트림 종료
+                break  # End-of-stream sentinel from reader thread
 
             event_type = event_data.get("type") or event_data.get("event_type") or "unknown"
+
+            # Track failures from the reader thread so the ops dashboard
+            # (DynamoDB job tracking) records them correctly.
+            if event_type == "error":
+                track_job_failure(upload_id, event_data.get("text", "unknown error"))
 
             if event_type == "plan_review_request":
                 yield format_sse({

@@ -75,9 +75,19 @@ LOG_GROUP="/ecs/deep-insight-web"
 TASK_ROLE_NAME="deep-insight-web-task-role"
 TASK_ROLE_POLICY_NAME="deep-insight-web-task-policy"
 
-# CloudFront managed prefix list ID (same across all regions)
-# See: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/LocationsOfEdgeServers.html
-CF_PREFIX_LIST="pl-82a045eb"
+# Look up CloudFront managed prefix list ID for the target region.
+# The prefix list name is always "com.amazonaws.global.cloudfront.origin-facing"
+# but the ID differs per region.
+CF_PREFIX_LIST=$(aws ec2 describe-managed-prefix-lists \
+    --filters "Name=prefix-list-name,Values=com.amazonaws.global.cloudfront.origin-facing" \
+    --region "$REGION" \
+    --query "PrefixLists[0].PrefixListId" --output text 2>/dev/null || true)
+
+if [ -z "$CF_PREFIX_LIST" ] || [ "$CF_PREFIX_LIST" = "None" ]; then
+    echo "ERROR: CloudFront managed prefix list not found in ${REGION}."
+    echo "Verify that the region supports CloudFront origin-facing prefix lists."
+    exit 1
+fi
 
 echo "============================================"
 echo "Deploy deep-insight-web (CloudFront mode)"

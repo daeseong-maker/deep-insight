@@ -5,7 +5,10 @@ echo "한글 폰트 설치 및 matplotlib 설정을 시작합니다..."
 
 # 필요한 패키지 설치
 echo "나눔 폰트 설치 중..."
-if command -v apt-get > /dev/null; then
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    brew install --cask font-nanum
+elif command -v apt-get > /dev/null; then
     # Ubuntu/Debian 계열
     sudo apt-get update
     sudo apt-get install -y fonts-nanum

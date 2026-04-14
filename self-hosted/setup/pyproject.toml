@@ -36,4 +36,13 @@ dependencies = [
     "reportlab==4.4.4",
     "markdown==3.10",
     "fpdf2==2.8.5",
+    "pypdf>=4.0.0",
+    "hypothesis>=6.0.0",
+    "opendataloader-pdf>=2.0.0",
+    "pytest>=9.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
 ]

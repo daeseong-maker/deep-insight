@@ -211,9 +211,9 @@ async function generateColdef() {
 
     // Show loading
     autogenBtn.disabled = true;
-    autogenBtn.textContent = t.coldef_generating || "⏳ 생성 중...";
+    autogenBtn.textContent = t.coldef_generating || "⏳ Generating...";
     statusDiv.classList.remove("hidden");
-    statusDiv.textContent = t.coldef_generating_hint || "AI가 컬럼 정의를 분석하고 있습니다...";
+    statusDiv.textContent = t.coldef_generating_hint || "AI is analyzing your columns...";
     statusDiv.style.color = "var(--text-muted)";
     reviewPanel.classList.add("hidden");
 
@@ -232,15 +232,15 @@ async function generateColdef() {
             document.getElementById("coldef-autogen-area").classList.add("hidden");
             document.getElementById("coldef-manual-divider").classList.add("hidden");
         } else {
-            statusDiv.textContent = (t.coldef_gen_failed || "생성 실패: ") + (data.error || "Unknown error");
+            statusDiv.textContent = (t.coldef_gen_failed || "Generation failed: ") + (data.error || "Unknown error");
             statusDiv.style.color = "var(--red)";
         }
     } catch (err) {
-        statusDiv.textContent = (t.coldef_gen_failed || "생성 실패: ") + err.message;
+        statusDiv.textContent = (t.coldef_gen_failed || "Generation failed: ") + err.message;
         statusDiv.style.color = "var(--red)";
     } finally {
         autogenBtn.disabled = false;
-        autogenBtn.textContent = t.coldef_autogen_btn || "🤖 컬럼 정의 자동 생성";
+        autogenBtn.textContent = t.coldef_autogen_btn || "🤖 Auto-generate Column Definitions";
     }
 }
 
@@ -268,8 +268,8 @@ function showColdefReview(coldefArray) {
 function renderColdefTable(coldefArray) {
     const t = translations[currentLang];
     const tableDiv = document.getElementById("coldef-review-table");
-    const headerName = t.coldef_table_col_name || "컬럼명";
-    const headerDesc = t.coldef_table_col_desc || "설명";
+    const headerName = t.coldef_table_col_name || "Column";
+    const headerDesc = t.coldef_table_col_desc || "Description";
 
     let html = `<table class="coldef-table"><thead><tr><th>${headerName}</th><th>${headerDesc}</th></tr></thead><tbody>`;
     for (const col of coldefArray) {
@@ -306,7 +306,7 @@ function updateViewToggleBtn() {
         btn.textContent = t.coldef_view_json || "{ } JSON";
         btn.classList.remove("btn-view-active");
     } else {
-        btn.textContent = t.coldef_view_table || "📊 테이블";
+        btn.textContent = t.coldef_view_table || "📊 Table";
         btn.classList.add("btn-view-active");
     }
 }
@@ -324,7 +324,7 @@ function toggleColdefEdit() {
         document.getElementById("coldef-review-table").classList.add("hidden");
         editor.classList.remove("hidden");
         editor.focus();
-        btn.textContent = t.coldef_preview_btn || "👁 미리보기";
+        btn.textContent = t.coldef_preview_btn || "👁 Preview";
     } else {
         // Validate JSON on switch back
         try {
@@ -348,7 +348,7 @@ function toggleColdefEdit() {
             preview.classList.remove("hidden");
             document.getElementById("coldef-review-table").classList.add("hidden");
         }
-        btn.textContent = t.coldef_edit_btn || "✏️ 직접 수정";
+        btn.textContent = t.coldef_edit_btn || "✏️ Edit";
     }
 }
 
@@ -370,7 +370,7 @@ function confirmColdef() {
     selectedDiv.textContent = "";
     const span = document.createElement("span");
     span.className = "file-selected";
-    span.textContent = "🤖 " + (t.coldef_auto_generated || "자동 생성됨: column_definitions.json") + " ";
+    span.textContent = "🤖 " + (t.coldef_auto_generated || "Auto-generated: column_definitions.json") + " ";
     const removeBtn = document.createElement("span");
     removeBtn.className = "remove-file";
     removeBtn.title = "Remove";
@@ -413,7 +413,7 @@ function refreshSelectedFileDisplays() {
         selectedColdef.textContent = "";
         const span = document.createElement("span");
         span.className = "file-selected";
-        span.textContent = "🤖 " + (t.coldef_auto_generated || "자동 생성됨: column_definitions.json") + " ";
+        span.textContent = "🤖 " + (t.coldef_auto_generated || "Auto-generated: column_definitions.json") + " ";
         const removeBtn = document.createElement("span");
         removeBtn.className = "remove-file";
         removeBtn.title = "Remove";

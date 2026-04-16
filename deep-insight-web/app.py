@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 RUNTIME_ARN = os.environ.get("RUNTIME_ARN", "")
 AWS_REGION = os.environ.get("AWS_REGION", "us-west-2")
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "")
+WEB_UTILITY_MODEL_ID = os.environ.get("WEB_UTILITY_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0")
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 SAMPLE_DATA_DIR = Path(__file__).resolve().parent / "sample_data"
@@ -201,7 +202,7 @@ CSV data:
         })
 
         response = bedrock.invoke_model(
-            modelId="us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            modelId=WEB_UTILITY_MODEL_ID,
             contentType="application/json",
             accept="application/json",
             body=body,

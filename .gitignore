@@ -41,3 +41,4 @@ under_development/
 dist/
 build/
 *.egg-info/
+/.kiro

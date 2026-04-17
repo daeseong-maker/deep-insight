@@ -23,9 +23,11 @@ PLAN_FEEDBACK_POLL_INTERVAL = int(os.getenv("PLAN_FEEDBACK_POLL_INTERVAL", "3"))
 
 # Tools
 from src.tools.coder_agent_custom_interpreter_tool import coder_agent_custom_interpreter_tool
-from src.tools.reporter_agent_custom_interpreter_tool import reporter_agent_custom_interpreter_tool
+# NOTE: PDF reporter disabled for skill system MVP phase
+# from src.tools.reporter_agent_custom_interpreter_tool import reporter_agent_custom_interpreter_tool
 from src.tools.tracker_agent_tool import tracker_agent_tool
 from src.tools.validator_agent_custom_interpreter_tool import validator_agent_custom_interpreter_tool
+from src.tools.skill_tool import skill_tool
 
 # Observability
 from opentelemetry import trace
@@ -149,6 +151,9 @@ async def coordinator_node(task=None, **kwargs):
 
         log_node_start("Coordinator")
 
+        # Import skill prompt from agentcore_runtime (Task 7.1)
+        from agentcore_runtime import _skill_prompt
+
         # Extract user request from task (now passed as dictionary)
         if isinstance(task, dict):
             request = task.get("request", "")
@@ -161,9 +166,13 @@ async def coordinator_node(task=None, **kwargs):
             data_directory = None
             request_id = ""
 
+        # Augment system prompt with skill information (Task 7.2)
+        base_prompt = apply_prompt_template(prompt_name="coordinator", prompt_context={})
+        system_prompt = base_prompt + _skill_prompt
+
         agent = strands_utils.get_agent(
             agent_name="coordinator",
-            system_prompts=apply_prompt_template(prompt_name="coordinator", prompt_context={}), # apply_prompt_template(prompt_name="task_agent", prompt_context={"TEST": "sdsd"})
+            system_prompts=system_prompt,
             model_id=os.getenv("COORDINATOR_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
             enable_reasoning=False,
             prompt_cache_info=(False, None), #(False, None), (True, "default")
@@ -227,6 +236,9 @@ async def planner_node(task=None, **kwargs):
         log_node_start("Planner")
         global _global_node_states
 
+        # Import skill prompt from agentcore_runtime (Task 7.1)
+        from agentcore_runtime import _skill_prompt
+
         # Extract shared state from global storage
         shared_state = _global_node_states.get('shared', None)
 
@@ -259,9 +271,13 @@ async def planner_node(task=None, **kwargs):
             prompt_context = {"USER_REQUEST": request}
             prompt_name = "planner"
 
+        # Augment system prompt with skill information (Task 7.2)
+        base_prompt = apply_prompt_template(prompt_name=prompt_name, prompt_context=prompt_context)
+        system_prompt = base_prompt + _skill_prompt
+
         agent = strands_utils.get_agent(
             agent_name="planner",
-            system_prompts=apply_prompt_template(prompt_name=prompt_name, prompt_context=prompt_context),
+            system_prompts=system_prompt,
             model_id=os.getenv("PLANNER_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
             enable_reasoning=True,
             prompt_cache_info=(False, None),  # enable prompt caching for reasoning agent, (False, None), (True, "default")
@@ -447,6 +463,9 @@ async def supervisor_node(task=None, **kwargs):
     log_node_start("Supervisor")
     global _global_node_states
 
+    # Import skill prompt from agentcore_runtime (Task 7.1)
+    from agentcore_runtime import _skill_prompt
+
     # task and kwargs parameters are unused - supervisor relies on global state
     tracer = trace.get_tracer(
         instrumenting_module_name=os.getenv("TRACER_MODULE_NAME", "insight_extractor_agent"),
@@ -464,14 +483,20 @@ async def supervisor_node(task=None, **kwargs):
         clues, full_plan = shared_state.get("clues", ""), shared_state.get("full_plan", "")
         request_prompt = shared_state.get("request_prompt", "")
 
+        # Augment system prompt with skill information (Task 7.2)
+        base_prompt = apply_prompt_template(prompt_name="supervisor", prompt_context={"FULL_PLAN": full_plan})
+        system_prompt = base_prompt + _skill_prompt
+
+        # NOTE: PDF reporter disabled for skill system MVP phase
+        # Removed reporter_agent_custom_interpreter_tool from tools list
         agent = strands_utils.get_agent(
             agent_name="supervisor",
-            system_prompts=apply_prompt_template(prompt_name="supervisor", prompt_context={"FULL_PLAN": full_plan}),
+            system_prompts=system_prompt,
             model_id=os.getenv("SUPERVISOR_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
             enable_reasoning=False,
             prompt_cache_info=(True, "default"),  # enable prompt caching for reasoning agent
             tool_cache=True,
-            tools=[coder_agent_custom_interpreter_tool, reporter_agent_custom_interpreter_tool, tracker_agent_tool, validator_agent_custom_interpreter_tool],  # Add coder, reporter, tracker and validator agents as tools
+            tools=[coder_agent_custom_interpreter_tool, tracker_agent_tool, validator_agent_custom_interpreter_tool, skill_tool],  # Add coder, tracker, validator agents and skill_tool
             streaming=True,
         )
 

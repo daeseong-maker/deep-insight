@@ -47,3 +47,4 @@ fpdf2==2.8.5
 python-dotenv==1.2.1
 pillow>=11.2.1
 langchain==1.0.7
+pyyaml==6.0.2

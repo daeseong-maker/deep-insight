@@ -1,0 +1,3 @@
+# This directory contains skill files (SKILL.md) that agents can load
+# Each skill should be in its own subdirectory with a SKILL.md file
+# Example: skills/my-skill/SKILL.md

@@ -134,12 +134,44 @@ User Query + Data Files (CSV, JSON)
 - ⏱️ **Long-Running Agent Tasks** - AgentCore and Fargate containers with adjustable vCPU/RAM for extended agent workflows
 - ☁️ **Infrastructure as Code** - CloudFormation nested stacks for reproducible deployments
 
+### Skill System
+
+- 🎓 **Dynamic Skill Loading** - Agents can load specialized instructions on-demand without bloating system prompts
+- 📚 **Lazy Loading Architecture** - Skills discovered at startup, loaded only when needed
+- 🔧 **Extensible Design** - Add new skills by creating SKILL.md files in the `skills/` directory
+- 💡 **Token Efficient** - Only active skills consume context tokens
+
+**How It Works:**
+1. At startup, the system scans `skills/` directory for SKILL.md files
+2. Skill metadata (name, description) is extracted and added to agent prompts
+3. When an agent needs specialized guidance, it invokes `skill_tool` with the skill name
+4. The full skill content (instructions, examples, best practices) is loaded on-demand
+5. Agent follows the loaded skill instructions to complete the task
+
+**Adding New Skills:**
+Create a directory under `skills/` with a `SKILL.md` file:
+```markdown
+---
+name: my-skill
+description: Brief description of what this skill does and when to use it
+---
+
+# My Skill Guide
+
+## Overview
+Detailed instructions, code examples, and best practices...
+```
+
+> 📖 **[Skill System Documentation →](docs/features/skill-system.md)** Complete guide to creating and using skills
+
+**Note:** PDF reporter functionality is currently disabled in this MVP phase. The skill system is fully operational with other agent capabilities.
+
 ### Multi-Agent Workflow
 
 Orchestrated by Coordinator → Planner → Supervisor (see [self-hosted](../self-hosted) for details):
 - 📊 **Coder Agent** - Automated data analysis and calculations
 - ✅ **Validator Agent** - Result validation and citation generation
-- 📄 **Reporter Agent** - Automatic DOCX report generation
+- 📄 **Reporter Agent** - Automatic DOCX report generation (currently disabled)
 - 📋 **Tracker Agent** - Workflow progress monitoring and task tracking
 
 > 📖 **[Compare with Self-Hosted →](production_deployment/docs/DEPLOYMENT_COMPARISON.md)** When to choose each option, feature comparison, and migration path

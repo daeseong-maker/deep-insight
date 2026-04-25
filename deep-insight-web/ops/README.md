@@ -17,9 +17,9 @@ Deep Insight Ops adds operational monitoring to the Web UI:
 All Ops resources are optional — the Web UI works normally without them.
 
 **References**:
-- [Planning Documents](../../docs/ops/plan/) — business requirements, research, technical approach, implementation plan
-- [Admin Authentication](../../docs/ops/admin-authentication.md) — Cognito JWT auth flow, cookie security, route protection
-- [Language Switching](../../docs/ops/language-switching.md) — Korean/English i18n for admin dashboard pages
+- [Planning Documents](../../docs/features/ops-dashboard/plan/) — business requirements, research, technical approach, implementation plan
+- [Admin Authentication](../../docs/features/ops-dashboard/admin-authentication.md) — Cognito JWT auth flow, cookie security, route protection
+- [Language Switching](../../docs/features/ops-dashboard/language-switching.md) — Korean/English i18n for admin dashboard pages
 
 ---
 

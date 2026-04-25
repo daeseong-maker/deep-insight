@@ -22,8 +22,8 @@
 - **[2026/04]** CloudFront + Cognito deployment option for Web UI — HTTPS with Lambda@Edge authentication for external demos and customer PoCs ([details](./deep-insight-web/README.md))
 - **[2026/03]** Ops Dashboard - job tracking, email notifications, and admin dashboard with Cognito authentication ([details](./deep-insight-web/ops/README.md))
 - **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](https://github.com/aws-samples/sample-deep-insight/blob/main/deep-insight-web/README.md))
-- **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system.md))
-- **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow.md))
+- **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system/README.md))
+- **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow/README.md))
 - **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
 - **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
 - **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation

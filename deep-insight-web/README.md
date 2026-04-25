@@ -14,7 +14,7 @@ Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentC
 - **Bilingual**: Korean / English language support
 - **Secure**: Two deployment options — VPN CIDR or CloudFront + Cognito auth
 
-<img src="../docs/front-end/images/web-ui.png" alt="Deep Insight Web UI" width="600"/>
+<img src="../docs/features/web-ui/images/web-ui.png" alt="Deep Insight Web UI" width="600"/>
 
 ---
 
@@ -113,7 +113,7 @@ Both scripts handle all infrastructure in a single run:
 | Artifacts | `GET /artifacts/{session_id}` | List generated report files |
 | Download | `GET /download/{session_id}/{filename}` | Download a report file |
 
-> For detailed feature specifications, see the [Development Plan](../docs/front-end/03-development-plan.md).
+> For detailed feature specifications, see the [Development Plan](../docs/features/web-ui/03-development-plan.md).
 >
 > For Ops Admin (job tracking, notifications, dashboard), see the [Ops Deployment Guide](ops/README.md).
 

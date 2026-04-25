@@ -405,9 +405,9 @@ label .req { color: var(--red); margin-left: 0.2rem; }
 /* Primary auto-generate button (prominent CTA) */
 .btn-autogen-primary {
     width: 100%;
-    background: linear-gradient(135deg, rgba(74, 124, 255, 0.18) 0%, rgba(74, 124, 255, 0.10) 100%);
+    background: linear-gradient(135deg, rgba(74, 124, 255, 0.35) 0%, rgba(74, 124, 255, 0.20) 100%);
     color: #fff;
-    border: 1.5px solid rgba(74, 124, 255, 0.5);
+    border: 1.5px solid rgba(74, 124, 255, 0.6);
     border-radius: var(--radius-sm);
     padding: 1rem 1rem;
     font-size: 0.95rem;
@@ -419,7 +419,7 @@ label .req { color: var(--red); margin-left: 0.2rem; }
     overflow: hidden;
 }
 .btn-autogen-primary::after {
-    content: '✨';
+    content: '💡';
     position: absolute;
     right: 1rem;
     top: 50%;
@@ -429,7 +429,7 @@ label .req { color: var(--red); margin-left: 0.2rem; }
     transition: all 0.25s;
 }
 .btn-autogen-primary:hover {
-    background: linear-gradient(135deg, rgba(74, 124, 255, 0.3) 0%, rgba(74, 124, 255, 0.18) 100%);
+    background: linear-gradient(135deg, rgba(74, 124, 255, 0.50) 0%, rgba(74, 124, 255, 0.30) 100%);
     border-color: var(--accent);
     box-shadow: 0 4px 20px rgba(74, 124, 255, 0.25);
     transform: translateY(-1px);
@@ -711,6 +711,7 @@ textarea::placeholder { color: var(--text-muted); }
     vertical-align: middle;
 }
 .tag-simple { background: rgba(52, 211, 153, 0.15); color: var(--green); border: 1px solid var(--green-border); }
+.tag-medium { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
 .tag-detailed { background: rgba(74, 124, 255, 0.12); color: var(--accent); border: 1px solid rgba(74, 124, 255, 0.25); }
 
 /* Analyze button row */

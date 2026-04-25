@@ -19,6 +19,8 @@
 
 ## *Latest News* 🔥
 
+- **[2026/04]** Auto-generate sample analysis prompts — AI generates 3 sample prompts (간단/중간/복잡 — simple/medium/complex) from your column-definitions JSON, replacing the previous hard-coded fallback chips. Each generated prompt references actual column names so it's immediately runnable. ([details](./docs/features/prompt-generation/README.md))
+- **[2026/04]** Auto-generate column definitions — AI builds `column_definitions.json` from a CSV header + sample rows, removing the manual JSON-authoring barrier for non-technical users. Includes a Table/JSON review panel with manual edit support. ([details](./docs/features/json-generation/README.md))
 - **[2026/04]** CloudFront + Cognito deployment option for Web UI — HTTPS with Lambda@Edge authentication for external demos and customer PoCs ([details](./deep-insight-web/README.md))
 - **[2026/03]** Ops Dashboard - job tracking, email notifications, and admin dashboard with Cognito authentication ([details](./deep-insight-web/ops/README.md))
 - **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](https://github.com/aws-samples/sample-deep-insight/blob/main/deep-insight-web/README.md))

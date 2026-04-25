@@ -41,6 +41,8 @@ function initUpload() {
 
     // Auto-generate column definitions
     initColdefAutogen();
+    // Auto-generate prompts
+    initPromptAutogen();
 
     // Upload form submission
     uploadForm.addEventListener("submit", async (e) => {
@@ -154,6 +156,7 @@ function clearColdef() {
 
 // ==================== Auto-generate Column Definitions ====================
 let _generatedColdefJson = null;
+let _generatedPrompts = null;  // [{level, tag, text}, ...] or null
 let _isEditing = false;
 let _viewMode = "table"; // "table" or "json"
 
@@ -393,6 +396,89 @@ function cancelColdef() {
     _generatedColdefJson = null;
     _isEditing = false;
     updateAutogenVisibility();
+}
+
+// ==================== Auto-generate Prompts ====================
+function initPromptAutogen() {
+    document.getElementById("prompt-autogen-btn")
+        .addEventListener("click", () => generatePrompts());
+    document.getElementById("prompt-regen-btn")
+        .addEventListener("click", () => generatePrompts());
+}
+
+async function generatePrompts() {
+    const t = translations[currentLang];
+    const autogenBtn = document.getElementById("prompt-autogen-btn");
+    const regenBtn = document.getElementById("prompt-regen-btn");
+    const statusDiv = document.getElementById("prompt-autogen-status");
+
+    // Resolve column-definitions source: manual upload OR auto-generated
+    const colDef = document.getElementById("col-def").files[0];
+    let coldefBlob;
+    let coldefName = "column_definitions.json";
+    if (colDef) {
+        coldefBlob = colDef;
+        coldefName = colDef.name;
+    } else if (_generatedColdefJson) {
+        coldefBlob = new Blob(
+            [JSON.stringify(_generatedColdefJson, null, 2)],
+            { type: "application/json" }
+        );
+    } else {
+        statusDiv.textContent = t.prompt_no_coldef ||
+            "Please provide column definitions first.";
+        statusDiv.style.color = "var(--red)";
+        statusDiv.classList.remove("hidden");
+        return;
+    }
+
+    // Loading state — pattern mirrors generateColdef()
+    autogenBtn.disabled = true;
+    regenBtn.disabled = true;
+    const generatingText = t.prompt_generating || "Generating...";
+    autogenBtn.textContent = generatingText;
+    regenBtn.textContent = generatingText;
+    statusDiv.textContent = t.prompt_generating_hint ||
+        "AI is generating sample prompts...";
+    statusDiv.style.color = "var(--text-muted)";
+    statusDiv.classList.remove("hidden");
+
+    try {
+        const formData = new FormData();
+        formData.append("column_definitions", coldefBlob, coldefName);
+        formData.append("lang", currentLang);
+
+        const res = await fetch("/generate-prompts", {
+            method: "POST",
+            body: formData,
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            _generatedPrompts = data.prompts;
+            statusDiv.classList.add("hidden");
+            // Switch from primary autogen area to the regen header (label + regen button)
+            document.getElementById("prompt-autogen-area")
+                .classList.add("hidden");
+            document.querySelector(".prompt-examples-header")
+                .classList.remove("hidden");
+            renderPromptExamples();
+        } else {
+            statusDiv.textContent = (t.prompt_gen_failed ||
+                "Generation failed: ") + (data.error || "Unknown error");
+            statusDiv.style.color = "var(--red)";
+        }
+    } catch (err) {
+        statusDiv.textContent = (t.prompt_gen_failed ||
+            "Generation failed: ") + err.message;
+        statusDiv.style.color = "var(--red)";
+    } finally {
+        autogenBtn.disabled = false;
+        regenBtn.disabled = false;
+        autogenBtn.textContent = t.prompt_autogen_btn ||
+            "Generate Sample Prompts";
+        regenBtn.textContent = t.prompt_regen_btn || "🔄 Regenerate";
+    }
 }
 
 // ==================== Refresh on language change ====================

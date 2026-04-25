@@ -68,6 +68,10 @@
                     <span class="callout-icon">💡</span>
                     <span data-i18n="guide_coldef_tip">컬럼 정의 파일은 선택사항이지만 권장합니다. 컬럼명이 도메인 고유 의미를 가질 수 있으며(예: 매출 = 순매출 vs 총매출), 분석에 적용할 수식도 정의할 수 있습니다.</span>
                 </div>
+                <div class="callout callout-blue" style="margin-top:0.6rem;margin-bottom:0.2rem">
+                    <span class="callout-icon">💡</span>
+                    <span><strong data-i18n="guide_ai_helpers_title">AI 도우미</strong> — <span data-i18n="guide_ai_helpers_desc">컬럼 정의와 분석 프롬프트 모두 AI가 자동으로 생성해 드릴 수 있습니다. 직접 입력하거나, 자동 생성된 결과를 그대로 사용하거나, 직접 수정해서 사용하세요.</span></span>
+                </div>
                 <div class="callout callout-amber" style="margin-top:0.8rem">
                     <span class="callout-icon">⏱</span>
                     <span data-i18n="guide_time_note">소요 시간은 프롬프트 복잡도, 데이터 크기, LLM 서버 상태에 따라 달라집니다. 샘플 데이터 기준 약 15~30분 소요될 수 있습니다.</span>
@@ -175,13 +179,27 @@
         <!-- Analyze (shown after upload) -->
         <div id="analyze-section" class="card analyze-card hidden">
             <h2 data-i18n="analyze_title">분석</h2>
+            <div class="callout callout-blue" style="margin-bottom:0.6rem">
+                <span class="callout-icon">💡</span>
+                <span data-i18n="analyze_intro">분석 프롬프트를 직접 입력하거나, 아래 AI 추천 샘플을 사용하세요.</span>
+            </div>
             <div class="field">
                 <label for="query" data-i18n="analyze_query_label">프롬프트</label>
                 <textarea id="query" rows="3" data-i18n-placeholder="analyze_placeholder"></textarea>
             </div>
             <!-- Prompt examples (repositioned here) -->
             <div class="prompt-examples-area">
-                <div class="prompt-examples-label" data-i18n="prompt_examples_label">예시를 클릭하면 자동 입력됩니다</div>
+                <!-- Auto-generate (Primary) — shown before first generation -->
+                <div id="prompt-autogen-area">
+                    <button type="button" id="prompt-autogen-btn" class="btn btn-autogen-primary" data-i18n="prompt_autogen_btn">💡 프롬프트 샘플 생성하기</button>
+                    <div class="coldef-autogen-desc" data-i18n="prompt_autogen_desc">컬럼 정의를 기반으로 AI가 3가지(간단/중간/복잡) 프롬프트를 생성합니다</div>
+                </div>
+                <!-- Status div — sibling so it's visible during both initial generation and regen -->
+                <div id="prompt-autogen-status" class="hidden"></div>
+                <div class="prompt-examples-header hidden">
+                    <span class="prompt-examples-label" data-i18n="prompt_examples_label">예시를 클릭하면 자동 입력됩니다</span>
+                    <button type="button" id="prompt-regen-btn" class="btn btn-sm btn-outline" data-i18n="prompt_regen_btn">🔄 재생성</button>
+                </div>
                 <div id="prompt-examples"></div>
             </div>
             <div class="analyze-row">

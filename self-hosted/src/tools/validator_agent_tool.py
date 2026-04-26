@@ -7,7 +7,7 @@ from strands.tools.tools import PythonAgentTool
 from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
-from src.prompts.template import apply_prompt_template
+from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 import pandas as pd
 from src.utils.strands_sdk_utils import TokenTracker
@@ -45,7 +45,6 @@ TOOL_SPEC = {
 }
 
 RESPONSE_FORMAT = "Response from {}:\n\n<response>\n{}\n</response>\n\n*Please execute the next step.*"
-FULL_PLAN_FORMAT = "Here is full plan :\n\n<full_plan>\n{}\n</full_plan>\n\n*Please consider this to select the next step.*"
 CLUES_FORMAT = "Here is clues from {}:\n\n<clues>\n{}\n</clues>\n\n"
 
 class Colors:
@@ -146,10 +145,13 @@ def _handle_validator_agent_tool(_task: Annotated[str, "The validation task or i
     request_prompt, full_plan = shared_state.get("request_prompt", ""), shared_state.get("full_plan", "")
     clues, messages = shared_state.get("clues", ""), shared_state.get("messages", [])
 
+    # Filter plan to only show Validator tasks (prevents Validator from seeing Coder/Reporter tasks)
+    validator_plan = filter_plan_for_agent(full_plan, "validator")
+
     # Create validator agent with specialized tools using consistent pattern
     validator_agent = strands_utils.get_agent(
         agent_name="validator",
-        system_prompts=apply_prompt_template(prompt_name="validator", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": full_plan}),
+        system_prompts=apply_prompt_template(prompt_name="validator", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": validator_plan}),
         model_id=os.getenv("VALIDATOR_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
         enable_reasoning=False,
         prompt_cache_info=(False, None), # reasoning agent uses prompt caching

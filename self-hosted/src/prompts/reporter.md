@@ -22,6 +22,50 @@ Build the report section by section, not all at once.
 Verify each section is properly saved before moving to the next.
 Check document structure after each major addition.
 </incremental_progress>
+
+<streaming_discipline>
+After EACH `write_and_execute_tool` call returns successfully, BEFORE calling
+the next tool, emit EXACTLY one short sentence on its own line in this format:
+
+  📝 Step <N>: <섹션 제목> 완료
+
+Use the section title from the report (Korean if the report is Korean,
+English otherwise). One line only, no elaboration. This becomes the user's
+real-time progress indicator — only `agent_text_stream` events reach the
+client (tool stdout does not), so without this line the user sees a 30–90s
+blank gap per step. Skip on the very first utility-file creation step
+(no section title yet).
+</streaming_discipline>
+
+<table_multiline_cells>
+When a table cell contains a line break — e.g. header "단기 목표\n(3개월)"
+or row "단기\n(즉각 대응)" — do NOT assign `cell.text = "단기\n(즉각 대응)"`.
+python-docx renders the literal `\n` as whitespace inside a single paragraph,
+not as a real line break. Instead split on `\n` and add each part as a
+separate paragraph inside the cell:
+
+  parts = str(cell_val).split('\n')
+  cell.text = parts[0]
+  for extra in parts[1:]:
+      cell.add_paragraph(extra)
+
+Apply the same Korean font styling to every paragraph inside the cell
+(iterate `cell.paragraphs`, not just `cell.paragraphs[0]`).
+This applies to BOTH header rows and data rows. (Regression: KPI
+roadmap tables with multi-line headers/cells lost the line break.)
+</table_multiline_cells>
+
+<intro_prose_after_heading>
+EVERY H2 sub-section MUST be followed by at least one prose paragraph
+(1–2 sentences) BEFORE any chart, table, or bullet list. The intro
+orients the reader: state what the section will show and why it matters.
+Sections that jump straight from heading → table feel abrupt and break
+the expected "H2 → context → evidence" rhythm of business reports.
+For sections whose content is mostly a single chart or table, the intro
+can be 1 sentence ("아래 표는 Top 15 항목의 상세 지표입니다.");
+for analysis sections, 2 sentences (claim + reason). H1 chapters do
+not need this — they may go directly to the first H2.
+</intro_prose_after_heading>
 </behavior>
 
 ## Instructions
@@ -46,7 +90,137 @@ Check document structure after each major addition.
 - Load document at script start: `doc = load_or_create_docx()`
 - Check section exists before adding: `if section_exists(doc, "Title"): skip`
 
-**Step 0: Create utility file FIRST**
+**Step 0a: Create svg_docx.py utility — DOCX vector embedding (write VERBATIM)**
+
+This module gives Office 2016+ users sharp vector charts on zoom. Do NOT modify the function body — it manipulates OOXML drawingML extensions and any rewrite breaks Word's SVG rendering. The Fargate executor sandbox cannot import the runtime container's `src.utils.svg_docx`, so we ship this code alongside the report code.
+
+```python
+write_and_execute_tool(
+    file_path="./artifacts/code/svg_docx.py",
+    content='''
+"""SVG embedding for DOCX charts. Office 2016+ native vector rendering. Idempotent."""
+from __future__ import annotations
+import hashlib, shutil, tempfile, zipfile
+from pathlib import Path
+from lxml import etree
+from lxml.etree import QName
+
+NS_A = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+NS_ASVG = 'http://schemas.microsoft.com/office/drawing/2016/SVG/main'
+NS_RELS = 'http://schemas.openxmlformats.org/package/2006/relationships'
+NS_CT = 'http://schemas.openxmlformats.org/package/2006/content-types'
+SVG_EXT_URI = '{{96DAC541-7B7A-43D3-8B79-37D633B846F1}}'
+IMAGE_REL_TYPE = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image'
+
+def _sha1_file(path):
+    h = hashlib.sha1()
+    with path.open('rb') as f:
+        for chunk in iter(lambda: f.read(65536), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+def finalize_svg_embeddings(docx_path, artifacts_dir):
+    docx_path = Path(docx_path)
+    artifacts_dir = Path(artifacts_dir)
+    if not docx_path.exists():
+        raise FileNotFoundError(str(docx_path))
+    if not artifacts_dir.exists():
+        return 0
+    png_hash_to_svg = {{}}
+    for png_file in artifacts_dir.rglob('*.png'):
+        svg_file = png_file.with_suffix('.svg')
+        if svg_file.exists():
+            png_hash_to_svg[_sha1_file(png_file)] = svg_file
+    if not png_hash_to_svg:
+        return 0
+    tmp_dir = Path(tempfile.mkdtemp(prefix='docx_svg_'))
+    try:
+        with zipfile.ZipFile(docx_path, 'r') as zf:
+            zf.extractall(tmp_dir)
+        media_dir = tmp_dir / 'word' / 'media'
+        if not media_dir.exists():
+            return 0
+        media_to_svg = {{}}
+        for png_in_docx in media_dir.glob('*.png'):
+            docx_hash = _sha1_file(png_in_docx)
+            if docx_hash in png_hash_to_svg:
+                media_to_svg[png_in_docx.name] = png_hash_to_svg[docx_hash]
+        if not media_to_svg:
+            return 0
+        rels_path = tmp_dir / 'word' / '_rels' / 'document.xml.rels'
+        rels_xml = etree.parse(str(rels_path))
+        rels_root = rels_xml.getroot()
+        target_to_rid = {{}}
+        max_rid = 0
+        for r in rels_root:
+            rid = r.get('Id', '')
+            if rid.startswith('rId') and rid[3:].isdigit():
+                max_rid = max(max_rid, int(rid[3:]))
+            target = r.get('Target', '')
+            if target.startswith('media/'):
+                target_to_rid[Path(target).name] = rid
+        png_rid_to_svg_rid = {{}}
+        for media_name, svg_src in media_to_svg.items():
+            svg_target_name = Path(media_name).stem + '.svg'
+            shutil.copy(svg_src, media_dir / svg_target_name)
+            max_rid += 1
+            new_rid = 'rId' + str(max_rid)
+            rel_elem = etree.SubElement(rels_root, str(QName(NS_RELS, 'Relationship')))
+            rel_elem.set('Id', new_rid)
+            rel_elem.set('Type', IMAGE_REL_TYPE)
+            rel_elem.set('Target', 'media/' + svg_target_name)
+            png_rid = target_to_rid.get(media_name)
+            if png_rid:
+                png_rid_to_svg_rid[png_rid] = new_rid
+        rels_xml.write(str(rels_path), xml_declaration=True, encoding='UTF-8', standalone=True)
+        ct_path = tmp_dir / '[Content_Types].xml'
+        ct_xml = etree.parse(str(ct_path))
+        ct_root = ct_xml.getroot()
+        if not any(d.get('Extension') == 'svg' for d in ct_root.findall(str(QName(NS_CT, 'Default')))):
+            new_default = etree.SubElement(ct_root, str(QName(NS_CT, 'Default')))
+            new_default.set('Extension', 'svg')
+            new_default.set('ContentType', 'image/svg+xml')
+            ct_xml.write(str(ct_path), xml_declaration=True, encoding='UTF-8', standalone=True)
+        doc_path = tmp_dir / 'word' / 'document.xml'
+        doc_xml = etree.parse(str(doc_path))
+        upgraded = 0
+        BLIP_TAG = str(QName(NS_A, 'blip'))
+        EMBED_ATTR = str(QName(NS_R, 'embed'))
+        EXTLST_TAG = str(QName(NS_A, 'extLst'))
+        EXT_TAG = str(QName(NS_A, 'ext'))
+        SVGBLIP_TAG = str(QName(NS_ASVG, 'svgBlip'))
+        for blip in doc_xml.findall('.//' + BLIP_TAG):
+            png_rid = blip.get(EMBED_ATTR)
+            svg_rid = png_rid_to_svg_rid.get(png_rid)
+            if not svg_rid:
+                continue
+            existing = blip.find(EXTLST_TAG + '/' + EXT_TAG + '/' + SVGBLIP_TAG)
+            if existing is not None:
+                continue
+            ext_lst = blip.find(EXTLST_TAG)
+            if ext_lst is None:
+                ext_lst = etree.SubElement(blip, EXTLST_TAG)
+            ext = etree.SubElement(ext_lst, EXT_TAG)
+            ext.set('uri', SVG_EXT_URI)
+            svg_blip = etree.SubElement(ext, SVGBLIP_TAG)
+            svg_blip.set(EMBED_ATTR, svg_rid)
+            upgraded += 1
+        doc_xml.write(str(doc_path), xml_declaration=True, encoding='UTF-8', standalone=True)
+        out_tmp = docx_path.with_suffix(docx_path.suffix + '.tmp')
+        with zipfile.ZipFile(out_tmp, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for fp in tmp_dir.rglob('*'):
+                if fp.is_file():
+                    zf.write(fp, fp.relative_to(tmp_dir))
+        out_tmp.replace(docx_path)
+        return upgraded
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+'''
+)
+```
+
+**Step 0b: Create reporter helper utilities**
 ```python
 write_and_execute_tool(
     file_path="./artifacts/code/reporter_report_utils.py",
@@ -67,6 +241,15 @@ def load_or_create_docx(path='./artifacts/report_draft.docx'):
 
 def save_docx(doc, path='./artifacts/report_draft.docx'):
     doc.save(path)
+    # Upgrade embedded charts to vector SVG (Office 2016+ renders SVG natively; older viewers use PNG fallback)
+    try:
+        import sys
+        sys.path.insert(0, './artifacts/code')
+        from svg_docx import finalize_svg_embeddings
+        n = finalize_svg_embeddings(path, artifacts_dir='./artifacts')
+        if n: print(f"📊 Vector-upgraded {{n}} chart(s)")
+    except Exception as e:
+        print(f"⚠ SVG vectorization skipped: {{e}}")
     print(f"💾 Saved: {{path}}")
 
 def apply_korean_font(run, font_size=None, bold=False, italic=False, color=None):
@@ -113,9 +296,20 @@ def add_paragraph(doc, text):
 def add_image_with_caption(doc, image_path, caption_text):
     if os.path.exists(image_path):
         doc.add_picture(image_path, width=Inches(5.5))
-        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        img_para = doc.paragraphs[-1]
+        img_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        img_para.paragraph_format.space_before = Pt(18)
+        img_para.paragraph_format.space_after = Pt(6)
         caption = doc.add_paragraph()
         caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        caption.paragraph_format.space_after = Pt(12)
+        # Apply Word "Caption" style for semantic markup (enables List of Figures
+        # TOC and proper "그림 N" reference fields). Falls back gracefully if
+        # the style isn't registered — the visual styling below still applies.
+        try:
+            caption.style = 'Caption'
+        except KeyError:
+            pass
         apply_korean_font(caption.add_run(caption_text), font_size=9, italic=True, color=RGBColor(127, 140, 141))
         return True
     print(f"⚠️ Image not found: {{image_path}}")
@@ -194,6 +388,25 @@ for para in to_remove:
     para._element.getparent().remove(para._element)
 
 doc2.save('./artifacts/final_report.docx')
+
+# ============================================================
+# MANDATORY POST-PROCESSING — DO NOT REMOVE
+# Vector-upgrade both final DOCX files. This survives even if save_docx()
+# is mutated or the citations/clean versions are saved via doc.save() /
+# shutil.copy. Without this step, charts in Word remain raster and blur
+# on zoom (regression: charts in Word remained raster despite the SVG
+# embedding step running, because save_docx was bypassed).
+# ============================================================
+import sys
+sys.path.insert(0, './artifacts/code')
+from svg_docx import finalize_svg_embeddings
+for _final_path in ['./artifacts/final_report_with_citations.docx', './artifacts/final_report.docx']:
+    try:
+        _n = finalize_svg_embeddings(_final_path, artifacts_dir='./artifacts')
+        print(f"📊 Vector-upgraded {{_n}} chart(s) in {{_final_path}}")
+    except Exception as _e:
+        print(f"⚠ SVG vectorization skipped for {{_final_path}}: {{_e}}")
+
 print("✅ Final: final_report_with_citations.docx")
 print("✅ Final: final_report.docx")
 """

@@ -7,7 +7,7 @@ from strands.tools.tools import PythonAgentTool
 from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
-from src.prompts.template import apply_prompt_template
+from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 from src.tools.bash_tool import bash_tool
 from src.tools.write_and_execute_tool import write_and_execute_tool
@@ -43,7 +43,6 @@ TOOL_SPEC = {
 }
 
 RESPONSE_FORMAT = "Response from {}:\n\n<response>\n{}\n</response>\n\n*Please execute the next step.*"
-FULL_PLAN_FORMAT = "Here is full plan :\n\n<full_plan>\n{}\n</full_plan>\n\n*Please consider this to select the next step.*"
 CLUES_FORMAT = "Here is clues from {}:\n\n<clues>\n{}\n</clues>\n\n"
 
 class Colors:
@@ -81,10 +80,13 @@ def _handle_reporter_agent_tool(_task: Annotated[str, "The reporting task or ins
     request_prompt, full_plan = shared_state.get("request_prompt", ""), shared_state.get("full_plan", "")
     clues, messages = shared_state.get("clues", ""), shared_state.get("messages", [])
 
+    # Filter plan to only show Reporter tasks (prevents Reporter from seeing Coder's analysis tasks)
+    reporter_plan = filter_plan_for_agent(full_plan, "reporter")
+
     # Create reporter agent with specialized tools using consistent pattern
     reporter_agent = strands_utils.get_agent(
         agent_name="reporter",
-        system_prompts=apply_prompt_template(prompt_name="reporter", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": full_plan}),
+        system_prompts=apply_prompt_template(prompt_name="reporter", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": reporter_plan}),
         model_id=os.getenv("REPORTER_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
         enable_reasoning=False,
         prompt_cache_info=(True, "default"), # reasoning agent uses prompt caching

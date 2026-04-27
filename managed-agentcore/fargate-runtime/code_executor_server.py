@@ -117,6 +117,7 @@ import re
 from datetime import datetime
 from io import StringIO
 import contextlib
+import unicodedata
 import boto3
 from flask import Flask, request, jsonify
 from pathlib import Path
@@ -723,7 +724,7 @@ def sync_from_s3(s3_client, bucket_name, s3_key_prefix, local_path):
             if not relative_path:  # Skip empty keys
                 continue
 
-            local_file_path = os.path.join(local_path, relative_path)
+            local_file_path = os.path.join(local_path, unicodedata.normalize('NFC', relative_path))
 
             # Create local directory
             local_file_dir = os.path.dirname(local_file_path)

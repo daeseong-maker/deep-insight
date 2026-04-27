@@ -136,6 +136,29 @@ if [ -f "$ENV_FILE" ]; then
 fi
 echo ""
 
+# Preserve existing WEB_UTILITY_MODEL_ID (used by deep-insight-web)
+EXISTING_WEB_UTILITY_MODEL_ID=""
+# Preserve existing per-agent model IDs (avoid downgrading via stale defaults)
+EXISTING_DEFAULT_MODEL_ID=""
+EXISTING_COORDINATOR_MODEL_ID=""
+EXISTING_PLANNER_MODEL_ID=""
+EXISTING_SUPERVISOR_MODEL_ID=""
+EXISTING_CODER_MODEL_ID=""
+EXISTING_VALIDATOR_MODEL_ID=""
+EXISTING_REPORTER_MODEL_ID=""
+EXISTING_TRACKER_MODEL_ID=""
+if [ -f "$ENV_FILE" ]; then
+    EXISTING_WEB_UTILITY_MODEL_ID=$(grep "^WEB_UTILITY_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_DEFAULT_MODEL_ID=$(grep "^DEFAULT_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_COORDINATOR_MODEL_ID=$(grep "^COORDINATOR_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_PLANNER_MODEL_ID=$(grep "^PLANNER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_SUPERVISOR_MODEL_ID=$(grep "^SUPERVISOR_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_CODER_MODEL_ID=$(grep "^CODER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_VALIDATOR_MODEL_ID=$(grep "^VALIDATOR_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_REPORTER_MODEL_ID=$(grep "^REPORTER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_TRACKER_MODEL_ID=$(grep "^TRACKER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+fi
+
 # Read Phase 1 outputs
 echo -e "${YELLOW}Reading Phase 1 CloudFormation outputs...${NC}"
 PHASE1_OUTPUTS=$(aws cloudformation describe-stacks \
@@ -212,14 +235,14 @@ AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
 # ============================================================
 # Bedrock Model Configuration
 # ============================================================
-DEFAULT_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-COORDINATOR_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0
-PLANNER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-SUPERVISOR_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-CODER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-VALIDATOR_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-REPORTER_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
-TRACKER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+DEFAULT_MODEL_ID=${EXISTING_DEFAULT_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+COORDINATOR_MODEL_ID=${EXISTING_COORDINATOR_MODEL_ID:-global.anthropic.claude-haiku-4-5-20251001-v1:0}
+PLANNER_MODEL_ID=${EXISTING_PLANNER_MODEL_ID:-global.anthropic.claude-opus-4-6-v1}
+SUPERVISOR_MODEL_ID=${EXISTING_SUPERVISOR_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+CODER_MODEL_ID=${EXISTING_CODER_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+VALIDATOR_MODEL_ID=${EXISTING_VALIDATOR_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+REPORTER_MODEL_ID=${EXISTING_REPORTER_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+TRACKER_MODEL_ID=${EXISTING_TRACKER_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
 
 # ============================================================
 # Phase 1: Infrastructure Outputs
@@ -283,6 +306,15 @@ cat >> "$ENV_FILE" <<EOF
 # S3 Configuration
 # ============================================================
 S3_BUCKET_NAME=$S3_BUCKET_NAME
+EOF
+
+# Add WEB_UTILITY_MODEL_ID (preserved from existing .env, or default)
+cat >> "$ENV_FILE" <<EOF
+
+# ============================================================
+# Web UI Utility Model (column-definitions / sample-prompts auto-gen)
+# ============================================================
+WEB_UTILITY_MODEL_ID=${EXISTING_WEB_UTILITY_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
 EOF
 
 # Preserve existing Runtime configuration (if exists)

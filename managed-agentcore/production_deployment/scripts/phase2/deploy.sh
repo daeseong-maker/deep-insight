@@ -127,6 +127,36 @@ AWS_REGION="$REGION"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 # ============================================
+# Detect existing stack state to preserve ECS resources
+# ============================================
+# If stack already has DeployECS=true, ECS resources (cluster/log group/
+# task def) are running. Stage 1's default DeployECS=false would mark
+# them for deletion — orphaning the cluster if any service uses it.
+# Skip Stage 1 in that case and reuse the existing ECR repository.
+EXISTING_DEPLOY_ECS="false"
+if aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" >/dev/null 2>&1; then
+    EXISTING_DEPLOY_ECS=$(aws cloudformation describe-stacks \
+        --stack-name "$STACK_NAME" \
+        --region "$AWS_REGION" \
+        --query 'Stacks[0].Parameters[?ParameterKey==`DeployECS`].ParameterValue | [0]' \
+        --output text 2>/dev/null)
+    if [ "$EXISTING_DEPLOY_ECS" = "None" ] || [ -z "$EXISTING_DEPLOY_ECS" ]; then
+        EXISTING_DEPLOY_ECS="false"
+    fi
+fi
+echo "Detected existing DeployECS=$EXISTING_DEPLOY_ECS"
+
+if [ "$EXISTING_DEPLOY_ECS" = "true" ]; then
+    echo ""
+    echo -e "${YELLOW}Skipping STAGE 1 (DeployECS=true, ECS resources running)${NC}"
+    echo "Reusing ECR repository from existing stack..."
+    ECR_URI=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" --query 'Stacks[0].Outputs[?OutputKey==`ECRRepositoryUri`].OutputValue' --output text)
+    ECR_REPO_NAME=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" --query 'Stacks[0].Outputs[?OutputKey==`ECRRepositoryName`].OutputValue' --output text)
+    echo "ECR Repository URI: $ECR_URI"
+    echo "ECR Repository Name: $ECR_REPO_NAME"
+else
+
+# ============================================
 # STAGE 1: Deploy ECR Repository Only
 # ============================================
 echo ""
@@ -216,6 +246,7 @@ ECR_REPO_NAME=$(aws cloudformation describe-stacks \
 echo ""
 echo "ECR Repository URI: $ECR_URI"
 echo "ECR Repository Name: $ECR_REPO_NAME"
+fi
 
 # ============================================
 # STAGE 2: Build and Push Docker Image

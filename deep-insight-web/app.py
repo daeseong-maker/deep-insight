@@ -19,6 +19,7 @@ import uvicorn
 from botocore.config import Config
 from dotenv import load_dotenv
 import re
+import unicodedata
 from urllib.parse import quote
 
 from ops.job_tracker import track_job_start, track_job_link, track_job_failure
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 RUNTIME_ARN = os.environ.get("RUNTIME_ARN", "")
 AWS_REGION = os.environ.get("AWS_REGION", "us-west-2")
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "")
-WEB_UTILITY_MODEL_ID = os.environ.get("WEB_UTILITY_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0")
+WEB_UTILITY_MODEL_ID = os.environ.get("WEB_UTILITY_MODEL_ID") or "global.anthropic.claude-sonnet-4-6"
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 SAMPLE_DATA_DIR = Path(__file__).resolve().parent / "sample_data"
@@ -424,7 +425,7 @@ async def upload(
     s3_paths = []
 
     # Upload data file (keep original filename)
-    data_key = f"uploads/{upload_id}/{data_file.filename}"
+    data_key = f"uploads/{upload_id}/{unicodedata.normalize('NFC', data_file.filename)}"
     s3.put_object(Bucket=S3_BUCKET_NAME, Key=data_key, Body=await data_file.read())
     s3_paths.append(f"s3://{S3_BUCKET_NAME}/{data_key}")
     logger.info(f"Uploaded: s3://{S3_BUCKET_NAME}/{data_key}")

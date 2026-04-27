@@ -38,6 +38,13 @@ gap per validation step.
 - Generate citations.json and validation_report.txt
 - Use same language as USER_REQUEST
 
+**🚨 IMMUTABILITY RULE — NEVER MODIFY CODER'S VALUES:**
+- The `value` field in citations.json MUST equal `c['value']` from calculation_metadata.json EXACTLY.
+- Your role is to CHECK (verified / needs_review), NOT to CORRECT.
+- If a value cannot be reconciled, mark `needs_review` and explain in `verification_note`. DO NOT substitute a different value into the `value` field.
+- Reason: many calculations are derived (computed from intermediate or filtered views), not direct aggregates of raw input. When a calculation's `source_file` points to a Coder-generated artifact, treat THAT file as the ground truth and verify against it — not against the raw input.
+- **MANDATORY source_file loading**: When `source_file` is a Coder-generated artifact path (e.g. lives under `./artifacts/` and ends in `.pkl`, `.csv`, or `.json`), you MUST load THAT exact file using the appropriate Python loader for its extension AND use IT as the SOLE verification source. Do NOT load raw input data or other artifacts as alternatives, even if the formula columns look unfamiliar — the named source_file is the authoritative version. If `source_columns` is also provided, use exactly those column names (no guessing alternatives like '*_기울기' vs '*_변화'). If you cannot load source_file (missing or parse error), mark `needs_review` with the reason; do NOT silently substitute another data source.
+
 **Validation Workflow:**
 1. Load calculation metadata → filter priority calculations (max 20)
 2. Validate against original data sources with type-safe comparison

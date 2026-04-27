@@ -321,6 +321,16 @@ def load_citations():
             return {{c["calculation_id"]: c["citation_id"] for c in json.load(f).get("citations", [])}}
     return {{}}
 
+def load_citation_statuses():
+    """🚨 Returns {{calc_id: verification_status}}. Use BEFORE quoting any value:
+    if status == 'needs_review' → append ' ⚠' after the citation marker
+    (e.g. 'value [N] ⚠') AND avoid using as a basis for downstream claims.
+    Do NOT silently use a needs_review value as if verified."""
+    if os.path.exists("./artifacts/citations.json"):
+        with open("./artifacts/citations.json", "r", encoding="utf-8") as f:
+            return {{c["calculation_id"]: c.get("verification_status", "verified") for c in json.load(f).get("citations", [])}}
+    return {{}}
+
 print("✅ Utility file created")
 '''
 )

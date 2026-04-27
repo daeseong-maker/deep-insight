@@ -116,6 +116,13 @@ def to_python_type(value):
     return value
 
 def track_calculation(calc_id, value, description, formula, source_file="", source_columns=None, importance="medium"):
+    """🚨 source_file AND source_columns are REQUIRED to enable Validator verification:
+    - source_file: Direct aggregates (SUM/AVG/COUNT) → input data path; Derived metrics → YOUR derived artifact path.
+      Prefer .csv over .pkl when feasible (both load fine, but .csv is more portable and human-readable).
+    - source_columns: list every column referenced in the formula
+      (e.g. formula='COUNT(col_a > X AND col_b < Y)' → source_columns=['col_a', 'col_b'])
+    Empty source_file forces Validator to guess from raw input; empty source_columns forces
+    Validator to guess column names. Both produce needs_review false positives."""
     _calculations.append({{"id": calc_id, "value": to_python_type(value), "description": description,
         "formula": formula, "source_file": source_file,
         "source_columns": source_columns or [], "importance": importance}})
@@ -172,14 +179,14 @@ plt.rcParams['svg.fonttype'] = 'path'  # font-independent SVG (Korean renders id
 # rcParams['font.family']='NanumGothic' alone is enough for Korean rendering.
 # Tuned so DOCX-displayed sizes (after 0.49x-0.76x scaling at 5.5in width) land
 # near body 10.5pt for titles and slightly smaller for bar labels/axis labels;
-# tick/legend further reduced since they're supporting text.
+# ticks slightly smaller (11) than labels/legend (12) since ticks are supporting text.
 plt.rcParams.update({{
     'font.size': 12,
     'axes.titlesize': 16,
     'axes.labelsize': 12,
     'xtick.labelsize': 11,
     'ytick.labelsize': 11,
-    'legend.fontsize': 11,
+    'legend.fontsize': 12,  # was 11; bumped for legibility in dense charts (e.g. multi-strategy color legends)
     'figure.titlesize': 18,
     # Force dark + bold text — `import lovelyplots` (loaded above) and matplotlib
     # defaults fade axis/tick/title text to light gray AND use thin/regular
@@ -233,6 +240,11 @@ Relationship (2 numeric variables):
 - 100 <= N < 500: scatter with alpha=0.5
 - N >= 500: hexbin (`ax.hexbin(x, y, gridsize=30, cmap='viridis')` + colorbar) -
   PLAIN SCATTER FORBIDDEN at this density (points occlude).
+- Exception — categorical color-coded scatter at N >= 500: when the chart
+  encodes a categorical variable via point color (e.g. group/category membership),
+  hexbin loses the color information. In this case, use scatter with
+  `alpha=0.6` AND `s=8` (smaller marker) to preserve cluster identity while
+  reducing occlusion. State the cap explicitly in the chart caption.
 
 Categorical bars:
 - Vertical bars: only when N <= 6 AND each label <= 6 chars (English) or <= 4 chars (Korean).
@@ -242,7 +254,12 @@ Categorical bars:
 
 Time series:
 - 1-5 series: single line chart, distinct colors + markers.
-- 6-15 series: split into separate full-width line charts (small multiples).
+- 6-15 series: MANDATORY split into separate full-width line charts (small
+  multiples) when any pair of lines visibly crosses more than once in the
+  time range. Reader cannot track 6+ overlapping lines with multiple crossings
+  (regression: 6-line chart with many crossings produced unreadable overlay).
+  Overlay is acceptable ONLY when series stratify monotonically into clear
+  non-crossing bands.
 - > 15 series: heatmap (rows=series, cols=time, cmap='RdYlGn').
 
 Part-whole composition:
@@ -250,7 +267,7 @@ Part-whole composition:
 - 6+ parts: horizontal bar (sorted by value). PIE FORBIDDEN with 6+ slices.
 
 Multivariate (3+ numeric variables):
-- 3 vars: bubble (x, y, size) - cap labels at top 10.
+- 3 vars: bubble (x, y, size) - cap labels at top 8 (see Annotation rules for collision handling).
 - 4+ vars: faceted small multiples OR table.
 
 FORBIDDEN entirely (any data):
@@ -265,6 +282,12 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
 - Bar charts (single or grouped, total bars ≤ 20): label every bar with its
   value. Use compact format ("3.2K", "15M") to prevent overlap. For >20 bars,
   label only top-N (5-10) and put the rest in a summary text box below.
+- Inline metric density (per bar/row): show at most ONE primary metric inline
+  (the bar's own value). Secondary metrics (rank, percentage, ratio) belong in
+  a separate panel, axis, or table — NOT concatenated into a single label.
+  Density antipattern: "value | metric_A | metric_B" per row turns the chart
+  into a dense text grid, defeating the visualization purpose. If multiple
+  metrics are essential, use grouped bars / multi-panel / separate table.
 - Single-line time-series (N ≤ 15): label every data point with its value
   (consistent with bar rule). Use `ha='left'` for first, `ha='right'` for last,
   `ha='center'` for middle points; `xytext=(0, 8)` and series color. For N > 15,
@@ -288,11 +311,20 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   ~5% of axis width × axis height), keep only ONE representative annotation
   — the largest bubble or highest-priority entry. Multiple labels within
   that radius will collide (e.g., 6+ bubble labels stacked on a single
-  cluster). For dense clusters where
-  even top-8 selection still produces overlap, use
-  `from adjustText import adjust_text; adjust_text(annotations)` to
-  auto-resolve. Last resort: drop text labels and rely on color + legend
+  cluster). When ≥ 4 annotations remain on the plot, ALWAYS pass them
+  through adjustText to auto-resolve residual collisions:
+  `from adjustText import adjust_text; adjust_text(annotation_list, arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))`.
+  This is the default — not a last resort. Final fallback (only if adjustText
+  also fails at extreme density): drop text labels and rely on color + legend
   to encode rank.
+- Annotation perimeter distribution: when ≥ 6 annotations remain after capping,
+  ensure they spread across multiple regions of the plot (top, bottom, left/right
+  sides) rather than clustered at a single edge. adjustText alone cannot rescue
+  labels packed into the same plot region — it only nudges within local space.
+  Force diversity by selecting points from each axis quadrant proportionally,
+  OR raise figsize height by 20-30% to give vertical breathing room.
+  Cluster-at-one-edge antipattern wastes the rest of the plot area and produces
+  unreadable label stacks.
 - ALL chart text (title, axis labels, tick labels, annotations, legends,
   in-chart text) must be pure black AND bold-weighted where appropriate.
   Default matplotlib styles + `lovelyplots` use light gray + thin/regular
@@ -306,9 +338,24 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   `color='gray'`, `'#888'`, or `alpha<0.8` to text/annotation calls —
   these regress to washed-out output.
 - Reference lines, quadrant labels, zone annotations: color must be '#333'
-  or darker. No 'gray', 'lightgray', or alpha < 0.7 - invisible after scaling.
+  or darker. No 'gray', 'lightgray', or alpha < 0.8 - invisible after scaling
+  (consistent with text/annotation alpha rule above).
+- Highlight fill regions (`axhspan` / `axvspan` / `Rectangle` overlays used to
+  emphasize quadrants, intervention zones, value bands): alpha ≥ 0.20.
+  Lower (0.10–0.15) renders barely visible at DOCX scale-down, defeating the
+  emphasis purpose. This is distinct from text/line alpha (above) — fills are
+  intentionally translucent but must remain perceptible.
 - Stacked-bar metadata (e.g. "지표A:50%, 지표B:95%"): place inside the bar
   segment or in a small table below, not floating above.
+- Dual-axis combo charts (bars on one axis + line on the other): bar value
+  labels and line value labels collide unless explicitly separated. Required
+  pattern:
+    - bar values: above bar tip with small offset, `xytext=(0, 4), va='bottom'`
+    - line values: white-background bbox to clear bars underneath:
+      `xytext=(0, 12), bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)`
+  Without bbox, line markers passing through the upper third of bars produce
+  text-on-text collisions (regression: line value labels overlapped bar value
+  labels in the upper third).
 
 **Layout / spacing rules (mandatory for font.size=12 baseline):**
 - Bubble size MUST be capped: `s = values / values.max() * 600`. Never raw
@@ -329,6 +376,13 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   Use `* 1.20` when adding `axvline()`/`axhline()` reference lines (mean/median
   markers) — these draw to the axes box edge and can appear visually clipped at
   the very top with only 1.15 padding.
+- Y-axis tightness for narrow data ranges: when the data range occupies less
+  than 50% of the plotted y-axis, tighten ylim. Auto-scaled axes often add too
+  much headroom for narrow data bands (e.g. data spans the lower fifth but axis
+  extends to the top, leaving most of the plot empty). Apply:
+  `ymin, ymax = data.min(), data.max(); margin = (ymax - ymin) * 0.1; ax.set_ylim(ymin - margin, ymax + margin)`.
+  If a reference line (axhline) falls far outside this range, omit it or
+  annotate the value as text in a corner.
 - Reference value labeling — DO NOT repeat per-row: if a chart has
   `axvline(x=target)` or `axhline(y=target)`, do NOT also label `target`
   at every bar/point. The reference line carries the value once; per-row
@@ -629,7 +683,7 @@ plt.rcParams.update({{
     'axes.labelsize': 12,
     'xtick.labelsize': 11,
     'ytick.labelsize': 11,
-    'legend.fontsize': 11,
+    'legend.fontsize': 12,  # was 11; bumped for legibility in dense charts (e.g. multi-strategy color legends)
     'figure.titlesize': 18,
     # Force dark + bold text — `import lovelyplots` (loaded above) and matplotlib
     # defaults fade axis/tick/title text to light gray AND use thin/regular

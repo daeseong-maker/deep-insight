@@ -385,8 +385,10 @@ if [ -z "$TASK_ROLE_ARN_VALUE" ] || [ "$TASK_ROLE_ARN_VALUE" = "None" ]; then
         --role-name "$TASK_ROLE_NAME" \
         --assume-role-policy-document "$TRUST_POLICY" \
         --query "Role.Arn" --output text)
+fi
 
-    TASK_POLICY=$(cat <<POLICY
+# Always refresh the inline policy so policy edits in this script take effect on every deploy
+TASK_POLICY=$(cat <<POLICY
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -424,17 +426,26 @@ if [ -z "$TASK_ROLE_ARN_VALUE" ] || [ "$TASK_ROLE_ARN_VALUE" = "None" ]; then
             "Effect": "Allow",
             "Action": ["bedrock-agentcore:InvokeAgentRuntime"],
             "Resource": "*"
+        },
+        {
+            "Sid": "BedrockInvokeClaude",
+            "Effect": "Allow",
+            "Action": ["bedrock:InvokeModel"],
+            "Resource": [
+                "arn:aws:bedrock:*:*:inference-profile/global.anthropic.claude-*",
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-*"
+            ]
         }
     ]
 }
 POLICY
 )
 
-    aws iam put-role-policy \
-        --role-name "$TASK_ROLE_NAME" \
-        --policy-name "$TASK_ROLE_POLICY_NAME" \
-        --policy-document "$TASK_POLICY"
-fi
+aws iam put-role-policy \
+    --role-name "$TASK_ROLE_NAME" \
+    --policy-name "$TASK_ROLE_POLICY_NAME" \
+    --policy-document "$TASK_POLICY"
+
 echo "Task Role: ${TASK_ROLE_ARN_VALUE}"
 
 # ---------- Step 6: CloudWatch Log Group ----------

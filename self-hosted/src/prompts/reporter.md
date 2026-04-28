@@ -225,11 +225,24 @@ def finalize_svg_embeddings(docx_path, artifacts_dir):
 write_and_execute_tool(
     file_path="./artifacts/code/reporter_report_utils.py",
     content='''
-import os, json, re
+import os, json, re, platform
 from docx import Document
 from docx.shared import Pt, RGBColor, Cm, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
+
+# 플랫폼별 한글 폰트 선택
+def get_korean_font():
+    """운영체제에 따라 적절한 한글 폰트 반환"""
+    system = platform.system()
+    if system == "Darwin":  # macOS
+        return "Nanum Gothic"
+    elif system == "Windows":
+        return "Malgun Gothic"
+    else:  # Linux
+        return "Nanum Gothic"
+
+KOREAN_FONT = get_korean_font()
 
 def load_or_create_docx(path='./artifacts/report_draft.docx'):
     if os.path.exists(path): return Document(path)
@@ -255,8 +268,8 @@ def save_docx(doc, path='./artifacts/report_draft.docx'):
 def apply_korean_font(run, font_size=None, bold=False, italic=False, color=None):
     if font_size: run.font.size = Pt(font_size)
     run.font.bold, run.font.italic = bold, italic
-    run.font.name = "Malgun Gothic"
-    run._element.rPr.rFonts.set(qn("w:eastAsia"), "Malgun Gothic")
+    run.font.name = KOREAN_FONT
+    run._element.rPr.rFonts.set(qn("w:eastAsia"), KOREAN_FONT)
     if color: run.font.color.rgb = color
 
 def section_exists(doc, heading_text):
@@ -431,7 +444,7 @@ print("✅ Final: final_report.docx")
 5. Conclusions (H2) - Bulleted recommendations
 6. References (H2) - Only in "with citations" version
 
-**Typography:** H1: 24pt Bold Blue | H2: 18pt Bold | Body: 10.5pt | Caption: 9pt Italic Gray | Font: Malgun Gothic
+**Typography:** H1: 24pt Bold Blue | H2: 18pt Bold | Body: 10.5pt | Caption: 9pt Italic Gray | Font: Nanum Gothic (macOS/Linux) or Malgun Gothic (Windows)
 
 </instructions>
 
@@ -518,7 +531,7 @@ write_and_execute_tool(
 - Report covers all analysis from all_results.txt
 - All charts integrated with analysis text (Image → Analysis pattern)
 - Two DOCX versions created (with/without citations)
-- Korean font (Malgun Gothic) applied properly
+- Korean font (platform-specific: Nanum Gothic on macOS/Linux, Malgun Gothic on Windows) applied properly
 - Both files saved to ./artifacts/
 </success_criteria>
 

@@ -1,0 +1,750 @@
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f7f4ee;
+    --paper-dark: #ede9e0;
+    --rule: #d6d0c4;
+    --accent: #c8392b;
+    --accent-soft: #f5e8e7;
+    --gold: #b8860b;
+    --gold-light: #fdf6e3;
+    --green: #2d6a4f;
+    --green-light: #e8f5f0;
+    --muted: #7a7368;
+    --shadow: 0 2px 20px rgba(15,14,12,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* 상단 헤더 */
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .site-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .site-logo span { color: var(--accent); }
+
+  .header-meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* 레이아웃 */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* 작품 타이틀 섹션 */
+  .work-header {
+    padding: 56px 0 40px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .work-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .work-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .work-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .work-tag {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 2px;
+    background: var(--paper-dark);
+    color: var(--muted);
+    border: 1px solid var(--rule);
+  }
+
+  /* 종합 판정 카드 */
+  .verdict-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0;
+    border: 1.5px solid var(--ink);
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.1s ease both;
+    overflow: hidden;
+  }
+
+  .verdict-score-col {
+    background: var(--ink);
+    color: white;
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+  }
+
+  .score-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .score-denom {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .score-grade {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #f0c050;
+  }
+
+  .verdict-text-col {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .verdict-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .verdict-body {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  /* 섹션 구조 */
+  .section {
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+  }
+
+  /* 점수 바 차트 */
+  .score-bars { display: flex; flex-direction: column; gap: 14px; }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 48px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .score-row-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .score-bar-track {
+    height: 8px;
+    background: var(--paper-dark);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 0;
+    transform-origin: left;
+    animation: barGrow 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes barGrow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .score-bar-fill.high { background: var(--green); animation-delay: 0.1s; }
+  .score-bar-fill.mid { background: var(--gold); animation-delay: 0.2s; }
+  .score-bar-fill.low { background: var(--accent); animation-delay: 0.3s; }
+
+  .score-row-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+    text-align: right;
+  }
+
+  /* 점수 테이블 */
+  .score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .score-table th {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1.5px solid var(--ink);
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  .score-table td {
+    padding: 12px 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .score-table tr:last-child td {
+    border-bottom: 1.5px solid var(--ink);
+    font-weight: 700;
+    background: var(--paper-dark);
+  }
+
+  .tag-high { color: var(--green); font-weight: 700; }
+  .tag-mid { color: var(--gold); font-weight: 700; }
+  .tag-low { color: var(--accent); font-weight: 700; }
+
+  /* 실패 패턴 */
+  .pattern-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .pattern-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+    padding: 14px 16px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .pattern-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+
+  .pattern-loc {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .pattern-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* 강점/약점 */
+  .strength-list, .weakness-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .strength-item {
+    padding: 18px 20px;
+    border-left: 3px solid var(--green);
+    background: var(--green-light);
+  }
+
+  .weakness-item {
+    padding: 18px 20px;
+    border-left: 3px solid var(--gold);
+    background: var(--gold-light);
+  }
+
+  .item-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stars {
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .item-body {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .item-evidence {
+    font-size: 12px;
+    color: var(--ink);
+    background: rgba(255,255,255,0.6);
+    padding: 8px 12px;
+    margin-top: 10px;
+    border-left: 2px solid var(--rule);
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  /* 개선 제안 */
+  .suggestion-list { display: flex; flex-direction: column; gap: 16px; counter-reset: suggestion; }
+
+  .suggestion-item {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+    counter-increment: suggestion;
+  }
+  .suggestion-item:last-child { border-bottom: none; }
+
+  .suggestion-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--rule);
+    line-height: 1;
+    padding-top: 2px;
+  }
+
+  .suggestion-content {}
+
+  .suggestion-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .suggestion-effect {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    background: var(--green-light);
+    padding: 2px 8px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .suggestion-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* 총평 */
+  .summary-box {
+    border: 1.5px solid var(--ink);
+    padding: 28px 32px;
+    background: var(--paper-dark);
+  }
+
+  .summary-body {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 14.5px;
+    line-height: 2;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  /* 등급 범례 */
+  .grade-legend {
+    display: flex;
+    gap: 0;
+    margin-top: 24px;
+    border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+
+  .grade-item {
+    flex: 1;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.5;
+    border-right: 1px solid var(--rule);
+  }
+  .grade-item:last-child { border-right: none; }
+  .grade-item.active { background: var(--ink); color: white; }
+  .grade-item .grade-range { font-weight: 700; font-size: 11px; display: block; }
+
+  @media (max-width: 600px) {
+    .site-header { padding: 12px 20px; }
+    .container { padding: 0 16px 60px; }
+    .work-title { font-size: 30px; }
+    .verdict-card { grid-template-columns: 1fr; }
+    .verdict-score-col { flex-direction: row; gap: 16px; padding: 20px 24px; }
+    .score-number { font-size: 52px; }
+    .score-row { grid-template-columns: 120px 1fr 40px; }
+    .work-header { padding: 36px 0 28px; }
+  }
+</style>
+
+<!-- 상단 안내문구 -->
+  <div class="disclaimer-top">
+    <p><strong>평가 안내</strong>: 본 평가는 59편의 학술 논문을 기반으로 숏폼 드라마의 <strong>구조적 적합성</strong>에 집중합니다. 장르, 플랫폼, 타겟 시청층에 따라 평가 결과가 달라질 수 있습니다.</p>
+  </div>
+
+
+<div class="container">
+
+  <!-- 작품 헤더 -->
+  <div class="work-header">
+    <div class="work-label">대본 분석 리포트</div>
+    <h1 class="work-title">마피아킹</h1>
+    <div class="work-meta-row">
+      <span class="work-tag">로맨스 / 달달 연애물</span>
+      <span class="work-tag">마피아 · 액션</span>
+      <span class="work-tag">전체 63화</span>
+    </div>
+  </div>
+
+  <!-- 종합 판정 -->
+  <div class="verdict-card">
+    <div class="verdict-score-col">
+      <div class="score-number">75</div>
+      <div class="score-denom">/ 100점</div>
+      <div class="score-grade">적합</div>
+    </div>
+    <div class="verdict-text-col">
+      <div class="verdict-title">종합 판정: 적합</div>
+      <div class="verdict-body">
+        마피아라는 독특한 권력 설정 위에 임신·계약 결혼이라는 강력한 훅을 얹어 초반 흡입력이 매우 높다. 감정 밀도와 대리만족 요소는 충분하나, 후반부 갈등 해소가 지나치게 빠르고 복선 없는 전환이 산발적으로 발생해 완성도를 낮춘다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 등급 범례 -->
+  <div class="grade-legend" style="margin-top:-32px; margin-bottom:48px;">
+    <div class="grade-item"><span class="grade-range">90–100</span>매우 적합</div>
+    <div class="grade-item active"><span class="grade-range">75–89</span>적합</div>
+    <div class="grade-item"><span class="grade-range">60–74</span>보통</div>
+    <div class="grade-item"><span class="grade-range">40–59</span>부적합</div>
+    <div class="grade-item"><span class="grade-range">0–39</span>매우 부적합</div>
+  </div>
+
+  <!-- 카테고리 점수 -->
+  <div class="section" style="animation-delay:0.15s">
+    <div class="section-heading">카테고리별 점수</div>
+    <div class="score-bars">
+      <div class="score-row">
+        <div class="score-row-label">A. 오프닝 & 훅</div>
+        <div class="score-bar-track"><div class="score-bar-fill high" style="width:90%"></div></div>
+        <div class="score-row-val tag-high">18</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-label">B. 서사 구조 & 클리프행어</div>
+        <div class="score-bar-track"><div class="score-bar-fill mid" style="width:60%"></div></div>
+        <div class="score-row-val tag-mid">12</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-label">C. 반전 & 복선</div>
+        <div class="score-bar-track"><div class="score-bar-fill low" style="width:40%"></div></div>
+        <div class="score-row-val tag-low">8</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-label">D. 인물 설계</div>
+        <div class="score-bar-track"><div class="score-bar-fill mid" style="width:55%"></div></div>
+        <div class="score-row-val tag-mid">11</div>
+      </div>
+      <div class="score-row">
+        <div class="score-row-label">E. 감정 밀도 & 쾌감</div>
+        <div class="score-bar-track"><div class="score-bar-fill high" style="width:100%"></div></div>
+        <div class="score-row-val tag-high">20</div>
+      </div>
+    </div>
+
+    <table class="score-table" style="margin-top:28px;">
+      <thead>
+        <tr>
+          <th>카테고리</th>
+          <th>기본점</th>
+          <th>패턴 감점</th>
+          <th>장르 가산</th>
+          <th>최종</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A. 오프닝 & 훅</td>
+          <td>18/20</td>
+          <td>—</td>
+          <td>—</td>
+          <td class="tag-high">18</td>
+        </tr>
+        <tr>
+          <td>B. 서사 구조 & 클리프행어</td>
+          <td>15/20</td>
+          <td>-3</td>
+          <td>—</td>
+          <td class="tag-mid">12</td>
+        </tr>
+        <tr>
+          <td>C. 반전 & 복선</td>
+          <td>13/20</td>
+          <td>-5</td>
+          <td>—</td>
+          <td class="tag-low">8</td>
+        </tr>
+        <tr>
+          <td>D. 인물 설계</td>
+          <td>15/20</td>
+          <td>-4</td>
+          <td>—</td>
+          <td class="tag-mid">11</td>
+        </tr>
+        <tr>
+          <td>E. 감정 밀도 & 쾌감</td>
+          <td>16/20</td>
+          <td>-2</td>
+          <td>+8</td>
+          <td class="tag-high">20 <span style="font-size:10px;color:var(--muted)">(상한 적용)</span></td>
+        </tr>
+        <tr>
+          <td><strong>종합</strong></td>
+          <td><strong>77/100</strong></td>
+          <td><strong>-14</strong></td>
+          <td><strong>+8</strong></td>
+          <td><strong>75/100</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 핵심 강점 -->
+  <div class="section" style="animation-delay:0.2s">
+    <div class="section-heading">핵심 강점</div>
+    <div class="strength-list">
+      <div class="strength-item">
+        <div class="item-title">
+          오프닝 훅 & 즉각 갈등 설정
+          <span class="stars">★★★★★</span>
+        </div>
+        <div class="item-evidence">Ep1 #1에서 피 묻은 마피아 후계자 → Ep1 #3에서 난자 판매하는 23세 여대생으로 즉각 교차. 배경 설명 없이 두 주인공의 절박함을 15초 내 구조적으로 충돌시킴.</div>
+      </div>
+      <div class="strength-item">
+        <div class="item-title">
+          대리만족 & 역전 쾌감 밀도
+          <span class="stars">★★★★★</span>
+        </div>
+        <div class="item-evidence">Ep25~28: 태오·새라 응징 3연타(총 겨누기 → 손가락 으스러뜨리기 → NBA 드래프트 취소). 학장의 굴복과 치어리더들의 바퀴벌레 장면까지 시청자 대리만족 극대화.</div>
+      </div>
+      <div class="strength-item">
+        <div class="item-title">
+          주인공 동기 명확성
+          <span class="stars">★★★★</span>
+        </div>
+        <div class="item-evidence">은수: 임신 사실 + 아기 보호 의지가 Ep4~5에서 즉각 확립. 지오: 후계자 필요 + 아버지의 명령이라는 이중 동기가 Ep1~2에서 설정. 두 동기가 충돌하는 구조가 선명함.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 핵심 약점 -->
+  <div class="section" style="animation-delay:0.25s">
+    <div class="section-heading">핵심 약점</div>
+    <div class="weakness-list">
+      <div class="weakness-item">
+        <div class="item-title">
+          악인 설계 (벨라·백 사장)
+          <span class="stars" style="color:var(--accent)">★★</span>
+        </div>
+        <div class="item-body">벨라는 Ep46에서 등장하나 이전 복선이 안 집사의 전화 한 통뿐. 백 사장은 Ep48에 갑자기 등장해 Ep50~51에서 즉시 제거됨. 두 악인 모두 '지오가 알아서 해결'하는 도구로 소비됨.</div>
+      </div>
+      <div class="weakness-item">
+        <div class="item-title">
+          클리프행어 후반부 약화
+          <span class="stars" style="color:var(--accent)">★★</span>
+        </div>
+        <div class="item-body">Ep40~48 구간은 감정 밀도는 높으나 매화 말미 미해결 갈등이 사실상 없음. "다음 화엔 무슨 일이?" 유발 장치 부재. 안 집사·벨라의 외부 위협을 해당 구간에 산발적으로 배치해 서스펜스 유지 필요.</div>
+      </div>
+      <div class="weakness-item">
+        <div class="item-title">
+          후반 해소 속도
+          <span class="stars" style="color:var(--accent)">★★</span>
+        </div>
+        <div class="item-body">Ep59~61에서 벨라 납치→출산→총격 해결이 2.5화 만에 끝남. 주요 악인 제거가 너무 빠르고 은수의 위기 감정이 충분히 쌓이기 전에 지오가 등장해 카타르시스 반감.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실패 패턴 경고 -->
+  <div class="section" style="animation-delay:0.3s">
+    <div class="section-heading">실패 패턴 경고</div>
+    <div class="pattern-list">
+      <div class="pattern-item">
+        <div>
+          <div class="pattern-name">뜬금없는 구원 — 지오가 매번 위기 직전 나타나 무조건 해결</div>
+          <div class="pattern-loc">Ep10, Ep25, Ep30, Ep51, Ep61 전반</div>
+        </div>
+        <div class="pattern-score">-5</div>
+      </div>
+      <div class="pattern-item">
+        <div>
+          <div class="pattern-name">복선 없는 반전 3개 이상 — 백 사장 등장·벨라 납치 전환이 급작스러움</div>
+          <div class="pattern-loc">Ep48, Ep58~59</div>
+        </div>
+        <div class="pattern-score">-5</div>
+      </div>
+      <div class="pattern-item">
+        <div>
+          <div class="pattern-name">동기 없는 악인 — 백 사장의 동기가 '여권+일등석'으로 너무 단순</div>
+          <div class="pattern-loc">Ep48</div>
+        </div>
+        <div class="pattern-score">-4</div>
+      </div>
+      <div class="pattern-item">
+        <div>
+          <div class="pattern-name">핵심 씬 생략 남용 — 벨라의 계획 준비 씬 없이 갑자기 납치 집도 장면으로 점프</div>
+          <div class="pattern-loc">Ep59</div>
+        </div>
+        <div class="pattern-score">-4</div>
+      </div>
+      <div class="pattern-item">
+        <div>
+          <div class="pattern-name">단면 조연 — 준(콘실리에리)이 정보 전달 기능에만 반복 사용, 독립 서사 없음</div>
+          <div class="pattern-loc">전반</div>
+        </div>
+        <div class="pattern-score">-2</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 개선 제안 -->
+  <div class="section" style="animation-delay:0.35s">
+    <div class="section-heading">우선 개선 제안</div>
+    <div class="suggestion-list">
+      <div class="suggestion-item">
+        <div class="suggestion-num">01</div>
+        <div class="suggestion-content">
+          <div class="suggestion-title">벨라 복선을 Ep30 이전에 심어라</div>
+          <div class="suggestion-effect">기대 효과 +6~8점</div>
+          <div class="suggestion-body">현재 벨라는 Ep46 안 집사의 전화 한 통으로 첫 등장. Ep20~25 구간에 벨라의 그림자(정보원 사진, 이탈리아발 우편, 안 집사의 비밀 통화 목격 등)를 1~2화에 걸쳐 배치하면 후반 납치 씬이 "당연한 귀결"로 받아들여짐.</div>
+        </div>
+      </div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">02</div>
+        <div class="suggestion-content">
+          <div class="suggestion-title">Ep40~48 감정 구간에 외부 위협 레이어 삽입</div>
+          <div class="suggestion-effect">기대 효과 +4점</div>
+          <div class="suggestion-body">욕실·서재·수영장 씬 연속 구간은 감정 밀도는 높지만 서사 긴장이 0에 수렴. 안 집사의 벨라 연락 씬을 해당 구간에 분산 배치(1화당 10~15초 분량)하면 로맨스 감정과 위협 감정이 교차하며 클리프행어 효과 회복 가능.</div>
+        </div>
+      </div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">03</div>
+        <div class="suggestion-content">
+          <div class="suggestion-title">백 사장 동기 재설계</div>
+          <div class="suggestion-effect">기대 효과 +3점</div>
+          <div class="suggestion-body">현재 백 사장의 동기(여권+일등석+전과자 탈출)는 너무 얕음. 지오 조직에 원한이 있는 전직 조직원으로 바꾸거나 벨라와의 관계에 감정적 종속을 추가하면 악인 인과 기준 충족.</div>
+        </div>
+      </div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">04</div>
+        <div class="suggestion-content">
+          <div class="suggestion-title">준의 내부 갈등 서사 1~2화 추가</div>
+          <div class="suggestion-effect">기대 효과 +2점</div>
+          <div class="suggestion-body">Ep14의 "한은수 대신 마피아 상속녀와 결혼하라" 건의 장면이 준의 독립적 시각이 드러나는 유일한 장면. Ep30~40 구간 어딘가에 준이 은수를 몰래 돕거나 방해하는 서브 씬 1~2개 추가로 조연 기능 평가 개선 가능.</div>
+        </div>
+      </div>
+      <div class="suggestion-item">
+        <div class="suggestion-num">05</div>
+        <div class="suggestion-content">
+          <div class="suggestion-title">Ep59~61 위기 구간 1~2화 늘려라</div>
+          <div class="suggestion-effect">기대 효과 +2점</div>
+          <div class="suggestion-body">벨라의 납치 직후 지오가 너무 빠르게 위치를 파악함. 지오의 수색 과정을 최소 1화 더 그리고, 그 사이 은수가 혼자 탈출을 시도하는 씬을 넣으면 은수의 주체성이 생기고 카타르시스가 배가됨.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 총평 -->
+  <div class="section" style="animation-delay:0.4s">
+    <div class="section-heading">총평</div>
+    <div class="summary-box">
+      <div class="summary-body">
+        마피아 설정에 임신·계약 결혼 훅을 결합한 아이디어 자체는 숏폼 시장에서 충분히 경쟁력 있다. 초반 30화의 완성도가 특히 높고, 태오·새라 응징 구간의 대리만족 쾌감은 이 대본 최고의 강점이다. 후반 악인 설계와 복선 구조만 보강하면 <strong>매우 적합</strong> 등급 진입이 가능한 작품.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 하단 면책 문구 -->
+  <div class="disclaimer-bottom">
+    <p><strong>주의</strong>: AI는 실수를 할 수 있습니다. 중요한 결정에는 전문가의 검토가 필요합니다.</p>
+  </div>

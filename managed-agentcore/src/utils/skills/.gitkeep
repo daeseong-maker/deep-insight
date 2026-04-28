@@ -1,4 +1,0 @@
-# This directory contains skill system infrastructure modules
-# - discovery.py: Scans skill directories and extracts metadata
-# - loader.py: Lazily loads full skill content when invoked
-# - skill_utils.py: Orchestrates skill system initialization

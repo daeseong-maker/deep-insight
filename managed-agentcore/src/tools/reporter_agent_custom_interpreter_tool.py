@@ -13,7 +13,6 @@ from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 from src.tools.custom_interpreter_write_and_execute_tool import custom_interpreter_write_and_execute_tool
 from src.tools.custom_interpreter_bash_tool import custom_interpreter_bash_tool
-from src.tools.skill_tool import skill_tool
 from src.utils.strands_sdk_utils import TokenTracker
 
 # Observability
@@ -129,7 +128,7 @@ def _handle_reporter_agent_custom_interpreter_tool(task: Annotated[str, "The rep
             enable_reasoning=False,
             prompt_cache_info=(True, "default"),  # enable prompt caching for reporter agent
             tool_cache=True,
-            tools=[custom_interpreter_write_and_execute_tool, custom_interpreter_bash_tool, skill_tool],  # Custom interpreter tools
+            tools=[custom_interpreter_write_and_execute_tool, custom_interpreter_bash_tool],  # Custom interpreter tools
             streaming=True  # Enable streaming for consistency
         )
 

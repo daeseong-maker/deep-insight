@@ -27,16 +27,6 @@ ENV DOCKER_CONTAINER=1
 
 # Create non-root user
 RUN useradd -m -u 1000 bedrock_agentcore
-
-# Create skill directories with proper ownership
-RUN mkdir -p /app/skills /app/src/utils/skills /app/src/tools && \
-    chown -R bedrock_agentcore:bedrock_agentcore /app
-
-# Copy skill system components (before user switch to ensure they're included)
-COPY --chown=bedrock_agentcore:bedrock_agentcore src/utils/skills/ /app/src/utils/skills/
-COPY --chown=bedrock_agentcore:bedrock_agentcore src/tools/skill_tool.py /app/src/tools/skill_tool.py
-COPY --chown=bedrock_agentcore:bedrock_agentcore skills/ /app/skills/
-
 USER bedrock_agentcore
 
 EXPOSE 9000
@@ -44,7 +34,7 @@ EXPOSE 8000
 EXPOSE 8080
 
 # Copy entire project (respecting .dockerignore)
-COPY --chown=bedrock_agentcore:bedrock_agentcore . .
+COPY . .
 
 # Use the full module path
 

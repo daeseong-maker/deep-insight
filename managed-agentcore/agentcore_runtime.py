@@ -78,11 +78,6 @@ from typing import Dict, Any, AsyncGenerator
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from src.utils.strands_sdk_utils import strands_utils
 from src.graph.builder import build_graph
-from src.utils.skills.skill_utils import initialize_skills
-
-# Module-level variables for skill system
-_available_skills = {}
-_skill_prompt = ""
 
 # ECS Cluster configuration from environment
 # Note: Environment variables are provided by AWS via create_agentcore_runtime_vpc.py
@@ -702,23 +697,6 @@ async def agentcore_streaming_execution(
         otel_context.detach(context_token)
 
 if __name__ == "__main__":
-    # Initialize skill system before starting runtime
-    try:
-        _available_skills, _skill_prompt = initialize_skills(
-            skill_dirs=["./skills"],
-            verbose=True
-        )
-        if _available_skills:
-            skill_count = len(_available_skills)
-            skill_names = list(_available_skills.keys())
-            print(f"✅ Skill system initialized with {skill_count} skills")
-            print(f"📚 Discovered skills: {skill_names}")
-        else:
-            print("⚠️ No skills discovered - skill system disabled")
-    except Exception as e:
-        print(f"⚠️ Skill system initialization failed: {e}")
-        print("Continuing without skill system...")
-    
     # Register cleanup to run only at process termination (once)
     atexit.register(cleanup_fargate_session)
 

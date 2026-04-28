@@ -42,6 +42,14 @@ Resources:
         - !Ref PrivateSubnet2Id
       SecurityGroups:
         - !Ref ALBSecurityGroupId
+      LoadBalancerAttributes:
+        # Long-running Coder/Validator/Reporter Python executions in Fargate
+        # frequently exceed the AWS default 60s idle timeout. Set to 3600s
+        # so the Runtime → Fargate HTTP connection survives multi-minute
+        # tool calls without dropping (default 60s caused mid-run "network
+        # error" symptoms in the Web UI).
+        - Key: idle_timeout.timeout_seconds
+          Value: '3600'
       Tags:
         - Key: Name
           Value: !Sub '${ProjectName}-alb-${Environment}'

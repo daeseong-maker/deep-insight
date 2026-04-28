@@ -19,6 +19,7 @@ import uvicorn
 from botocore.config import Config
 from dotenv import load_dotenv
 import re
+import unicodedata
 from urllib.parse import quote
 
 from ops.job_tracker import track_job_start, track_job_link, track_job_failure
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 RUNTIME_ARN = os.environ.get("RUNTIME_ARN", "")
 AWS_REGION = os.environ.get("AWS_REGION", "us-west-2")
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "")
-WEB_UTILITY_MODEL_ID = os.environ.get("WEB_UTILITY_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0")
+WEB_UTILITY_MODEL_ID = os.environ.get("WEB_UTILITY_MODEL_ID") or "global.anthropic.claude-sonnet-4-6"
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 SAMPLE_DATA_DIR = Path(__file__).resolve().parent / "sample_data"
@@ -236,6 +237,117 @@ CSV data:
         )
 
 
+@app.post("/generate-prompts")
+async def generate_prompts(
+    column_definitions: UploadFile = File(...),
+    lang: str = Form("ko"),
+):
+    """Generate 3 sample analysis prompts (simple/medium/complex) from a
+    column-definitions JSON, using Bedrock Claude.
+
+    Mirrors /generate-column-definitions in shape: one file input + lang.
+    Used by the Web UI to populate dynamic prompt chips in the analyze card.
+    """
+    try:
+        raw = await column_definitions.read()
+        try:
+            coldef_data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": f"Invalid JSON: {e}"},
+            )
+
+        if not isinstance(coldef_data, list) or not coldef_data:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "column_definitions must be a non-empty JSON array"},
+            )
+
+        lang_instruction = (
+            "Write all prompt text in Korean."
+            if lang == "ko"
+            else "Write all prompt text in English."
+        )
+        tag_simple = "간단" if lang == "ko" else "Simple"
+        tag_medium = "중간" if lang == "ko" else "Medium"
+        tag_complex = "복잡" if lang == "ko" else "Complex"
+
+        prompt = f"""You generate sample business-analysis prompts for a data analysis tool, given a column-definitions JSON describing the dataset.
+
+Generate exactly 3 sample prompts at distinct complexity levels:
+
+- "simple":  one metric or one operation (e.g., summarize key metrics, calculate a total). 1 sentence, under 40 characters.
+- "medium":  a focused trend, segmentation, or comparison spanning 2-3 columns. 1-2 sentences.
+- "complex": a strategic, multi-dimensional question requiring synthesis across many columns - e.g., growth-opportunity discovery, multi-factor optimization. 2-4 sentences. Should ask for prioritized actionable strategies with expected impact.
+
+Use a business perspective, not a technical one. Reference actual column names from the JSON where natural.
+
+{lang_instruction}
+
+Return ONLY a valid JSON array with this exact shape, no markdown fences, no explanation:
+
+[
+  {{"level": "simple",  "tag": "{tag_simple}",  "text": "..."}},
+  {{"level": "medium",  "tag": "{tag_medium}",  "text": "..."}},
+  {{"level": "complex", "tag": "{tag_complex}", "text": "..."}}
+]
+
+Column definitions:
+{json.dumps(coldef_data, ensure_ascii=False)}"""
+
+        bedrock = boto3.client("bedrock-runtime", region_name=AWS_REGION)
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 512,
+            "messages": [{"role": "user", "content": prompt}],
+        })
+
+        response = bedrock.invoke_model(
+            modelId=WEB_UTILITY_MODEL_ID,
+            contentType="application/json",
+            accept="application/json",
+            body=body,
+        )
+
+        result = json.loads(response["body"].read())
+        text_content = result["content"][0]["text"].strip()
+
+        # Strip markdown code fences if present (mirrors /generate-column-definitions)
+        if text_content.startswith("```"):
+            lines = text_content.split("\n")
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            text_content = "\n".join(lines).strip()
+
+        prompts = json.loads(text_content)
+
+        if not isinstance(prompts, list) or len(prompts) != 3:
+            return JSONResponse(
+                status_code=500,
+                content={"success": False, "error": f"LLM returned {len(prompts) if isinstance(prompts, list) else 'non-array'} prompts; expected 3"},
+            )
+        for p in prompts:
+            if not isinstance(p, dict) or set(p.keys()) < {"level", "tag", "text"}:
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "error": "LLM response missing required keys (level, tag, text)"},
+                )
+
+        return {"success": True, "prompts": prompts}
+
+    except json.JSONDecodeError:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "LLM returned invalid JSON. Please try again."},
+        )
+    except Exception as e:
+        logger.error(f"Prompt generation failed: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)},
+        )
+
+
 # ---------- Feature 2: Static page serving ----------
 
 
@@ -313,7 +425,7 @@ async def upload(
     s3_paths = []
 
     # Upload data file (keep original filename)
-    data_key = f"uploads/{upload_id}/{data_file.filename}"
+    data_key = f"uploads/{upload_id}/{unicodedata.normalize('NFC', data_file.filename)}"
     s3.put_object(Bucket=S3_BUCKET_NAME, Key=data_key, Body=await data_file.read())
     s3_paths.append(f"s3://{S3_BUCKET_NAME}/{data_key}")
     logger.info(f"Uploaded: s3://{S3_BUCKET_NAME}/{data_key}")

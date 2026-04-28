@@ -7,7 +7,7 @@ from strands.tools.tools import PythonAgentTool
 from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
-from src.prompts.template import apply_prompt_template
+from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 from src.tools import skill_tool
 from src.tools.bash_tool import bash_tool
@@ -45,7 +45,6 @@ TOOL_SPEC = {
 }
 
 RESPONSE_FORMAT = "Response from {}:\n\n<response>\n{}\n</response>\n\n*Please execute the next step.*"
-FULL_PLAN_FORMAT = "Here is full plan :\n\n<full_plan>\n{}\n</full_plan>\n\n*Please consider this to select the next step.*"
 CLUES_FORMAT = "Here is clues from {}:\n\n<clues>\n{}\n</clues>\n\n"
 
 class Colors:
@@ -89,10 +88,13 @@ def _handle_coder_agent_tool(task: Annotated[str, "The coding task or question t
         verbose=True # If True, You can see tha available skills
     )
     
+    # Filter plan to only show Coder tasks (prevents Coder from seeing Reporter's "create DOCX" task)
+    coder_plan = filter_plan_for_agent(full_plan, "coder")
+
     # Create coder agent with specialized tools using consistent pattern
     coder_agent = strands_utils.get_agent(
         agent_name="coder",
-        system_prompts=apply_prompt_template(prompt_name="coder", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": full_plan}) + skill_prompt,
+        system_prompts=apply_prompt_template(prompt_name="coder", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": coder_plan}) + skill_prompt,
         model_id=os.getenv("CODER_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
         enable_reasoning=False,
         prompt_cache_info=(True, "default"),  # reasoning agent uses prompt caching

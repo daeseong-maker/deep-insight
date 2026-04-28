@@ -462,7 +462,8 @@ echo "=== Step 7: ECS Task Definition ==="
 BASE_ENV='[
     {"name": "RUNTIME_ARN", "value": "'"${RUNTIME_ARN_VALUE}"'"},
     {"name": "AWS_REGION", "value": "'"${REGION}"'"},
-    {"name": "S3_BUCKET_NAME", "value": "'"${S3_BUCKET}"'"}
+    {"name": "S3_BUCKET_NAME", "value": "'"${S3_BUCKET}"'"},
+    {"name": "WEB_UTILITY_MODEL_ID", "value": "'"${WEB_UTILITY_MODEL_ID}"'"}
 ]'
 
 # Preserve env vars added by deploy_ops.sh (e.g., DYNAMODB_TABLE_NAME, SNS_TOPIC_ARN)

@@ -71,8 +71,8 @@ This document summarizes research conducted for the Deep Insight Ops business re
 - AWS Blog: https://aws.amazon.com/blogs/machine-learning/introducing-agent-to-agent-protocol-support-in-amazon-bedrock-agentcore-runtime/
 - AWS Docs: https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-a2a.html
 - Google A2A spec: https://google-a2a.github.io/A2A/latest/
-- Project PoCs: docs/front-end/02-technical-proof-points.md (PoC 1-3)
-- Project A2A deferral: docs/front-end/01-plan.md (lines 197-200)
+- Project PoCs: docs/features/web-ui/02-technical-proof-points.md (PoC 1-3)
+- Project A2A deferral: docs/features/web-ui/01-plan.md (lines 197-200)
 
 ---
 
@@ -280,8 +280,8 @@ VPN Users ──────────────┐
 - Bedrock AgentCore A2A: https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-a2a.html
 
 ### Project References
-- A2A PoC results: docs/front-end/02-technical-proof-points.md
-- A2A deferral decision: docs/front-end/01-plan.md (lines 197-200)
+- A2A PoC results: docs/features/web-ui/02-technical-proof-points.md
+- A2A deferral decision: docs/features/web-ui/01-plan.md (lines 197-200)
 - A2A hybrid architecture: managed-agentcore/under_development/a2a_hybrid_architecture.md
 - BFF SSE relay: deep-insight-web/app.py (agentcore_sse_generator, lines 233-293)
 - Event queue: managed-agentcore/src/utils/event_queue.py

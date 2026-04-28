@@ -8,7 +8,7 @@ def filter_plan_for_agent(full_plan: str, agent_name: str) -> str:
 
     Prevents agents from seeing other agents' task instructions (e.g., Coder
     seeing Reporter's "create DOCX" task), which causes prompt violations.
-    See: docs/incidents/2026-03-17-reporter-stream-timeout-incomplete-read.md
+    See: docs/incidents/2026-03-17-reporter-stream-timeout/incident.md
     """
     if not full_plan or not full_plan.strip():
         return full_plan
